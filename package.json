@@ -1,0 +1,33 @@
+{
+  "name": "trippe",
+  "version": "0.1.0",
+  "type": "module",
+  "engines": {
+    "node": ">=14.19 <15 || >=16.15 <17 || >=18"
+  },
+  "exports": "./src/index.js",
+  "description": "Unofficial API wrapper to check hotel prices and reward nights availability - suitable for an intercontinental lifestyle.",
+  "keywords": [
+    "hotels",
+    "api",
+    "travel",
+    "tourism"
+  ],
+  "author": "Raphael Cockx",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "ava": "^5.0.1",
+    "dotenv": "^16.0.3",
+    "eslint": "^8.27.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.5.1",
+    "eslint-plugin-promise": "^6.1.1"
+  },
+  "scripts": {
+    "test": "ava"
+  },
+  "dependencies": {
+    "got": "^12.5.2"
+  }
+}
