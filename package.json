@@ -28,6 +28,7 @@
     "test": "ava"
   },
   "dependencies": {
+    "dayjs": "^1.11.6",
     "got": "^12.5.2"
   }
 }

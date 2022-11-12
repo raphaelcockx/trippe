@@ -1,4 +1,5 @@
 import got from 'got'
+import dayjs from 'dayjs'
 
 export default class Trippe {
   #headers
@@ -31,6 +32,49 @@ export default class Trippe {
           longitude: profile.latLong.longitude,
           url: `https://${address.consumerFriendlyURL}`
         }
+      })
+  }
+
+  getPrice (hotelId, {
+    startDate = dayjs().format('YYYY-MM-DD'),
+    endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
+  } = {}) {
+    const headers = this.#headers
+
+    // Check if hotelId was provided
+    if (!hotelId) {
+      throw new Error('hotelId is required')
+    }
+
+    // Calculate number of days
+    const days = dayjs(endDate).diff(dayjs(startDate), 'day') + 1
+
+    // Check if there's 60 days or less
+    if (days > 60) {
+      throw new Error('Please limit the number of days to 60 or less')
+    }
+
+    const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelId.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
+    const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
+
+    return got.get(url, { headers }).json()
+      .then(json => json.hotels[0])
+      .then(hotel => {
+        const { currencyCode, rates } = hotel
+        const ratesCombined = rates.flatMap(rate => rate.windows)
+
+        return dates.map(checkinDate => {
+          const points = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map(rate => rate.totalPoints))
+          const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
+
+          return {
+            hotelId,
+            checkinDate,
+            cashPrice: cashPrice < Infinity ? cashPrice : null,
+            currencyCode,
+            points: points < Infinity ? points : null
+          }
+        })
       })
   }
 }
