@@ -48,8 +48,7 @@ export default class Trippe {
    * @param {object} dates An object containing startDate and endDate keys (both optional)
    * @returns {Promise<Array>}
   */
-
-  getPrices (hotelId, {
+  getHotelPrices (hotelId, {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
   } = {}) {
@@ -90,5 +89,77 @@ export default class Trippe {
           }
         })
       })
+  }
+
+  /**
+   * Returns an array of prices (in points and in cash) in a search area and for a given night
+   *
+   * @param {string} centrePoint The point (in [longitude, latitude] notation) to search from
+   * @param {object} options An object containing radius, unit and checkinDate parameters (all optional)
+   * @returns {Promise<Array>}
+  */
+  getAreaPrices ([longitude, latitude], {
+    radius = 100,
+    unit = 'mi',
+    checkinDate = dayjs().format('YYYY-MM-DD')
+  } = {}) {
+    const headers = this.#headers
+    const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=summary,summary.rateRanges'
+    const checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+
+    const json = {
+      products: [
+        {
+          productCode: 'SR',
+          guestCounts: [
+            {
+              otaCode: 'AQC10',
+              count: 1
+            },
+            {
+              otaCode: 'AQC8',
+              count: 0
+            }
+          ],
+          quantity: 1
+        }
+      ],
+      radius,
+      distanceUnit: unit.toUpperCase(),
+      distanceType: 'STRAIGHT_LINE',
+      startDate: checkinDate,
+      endDate: checkoutDate,
+      geoLocation: [
+        {
+          longitude,
+          latitude
+        }
+      ],
+      rates: {
+        ratePlanCodes: [
+          {
+            internal: 'IVANI'
+          }
+        ]
+      }
+    }
+
+    return got.post(url, { headers, json, retry: { methods: ['POST'] } }).json()
+      .then(json => json.hotels)
+      .then(hotels => hotels.filter(hotel => hotel.availabilityStatus === 'OPEN'))
+      .then(hotels => hotels.map(hotel => {
+        const { hotelMnemonic: hotelId, propertyCurrency: currencyCode, lowestPointsOnlyCost, lowestCashOnlyCost } = hotel
+
+        const cashPrice = parseFloat(lowestCashOnlyCost.amountAfterTax)
+        const points = lowestPointsOnlyCost ? lowestPointsOnlyCost.points : null
+
+        return {
+          hotelId,
+          checkinDate,
+          cashPrice,
+          currencyCode,
+          points
+        }
+      }))
   }
 }
