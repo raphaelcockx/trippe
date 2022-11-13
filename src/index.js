@@ -16,9 +16,15 @@ export default class Trippe {
     }
   }
 
-  getHotelDetails (id) {
+  /**
+   * Gets basic info on a hotel
+   *
+   * @param {string} hotelId The systemwide id of the hotel
+   * @returns {Promise<Object>}
+  */
+  getHotelDetails (hotelId) {
     const headers = this.#headers
-    const url = `https://apis.ihg.com/hotels/v1/profiles/${id}/details?fieldset=brandInfo,profile,address`
+    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelId}/details?fieldset=brandInfo,profile,address`
 
     return got.get(url, { headers }).json()
       .then(json => json.hotelInfo)
@@ -35,7 +41,15 @@ export default class Trippe {
       })
   }
 
-  getPrice (hotelId, {
+  /**
+   * Returns an array of prices (in points and in cash) per night for a period of up to 60 days
+   *
+   * @param {string} hotelId The systemwide id of the hotel
+   * @param {object} dates An object containing startDate and endDate keys (both optional)
+   * @returns {Promise<Array>}
+  */
+
+  getPrices (hotelId, {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
   } = {}) {
