@@ -23,6 +23,11 @@ export default class Trippe {
    * @returns {Promise<Object>}
   */
   getHotelDetails (hotelId) {
+    // Check if hotelId was provided
+    if (!hotelId) {
+      throw new Error('hotelId is required')
+    }
+
     const headers = this.#headers
     const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelId}/details?fieldset=brandInfo,profile,address`
 
@@ -38,6 +43,9 @@ export default class Trippe {
           longitude: profile.latLong.longitude,
           url: `https://${address.consumerFriendlyURL}`
         }
+      })
+      .catch((err) => {
+        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'Unknown or invalid hotelId' : err)
       })
   }
 

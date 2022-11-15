@@ -12,6 +12,32 @@ test('Throws when no API key provided', (t) => {
   })
 })
 
+test('Throws when no hotelId is provided to getHotelDetails', (t) => {
+  // Load environment variables
+  dotenv.config()
+
+  const trippe = new Trippe(process.env.API_KEY)
+
+  t.throws(() => {
+    trippe.getHotelDetails()
+  }, {
+    message: 'hotelId is required'
+  })
+})
+
+test('Throws when invalid or unknown hotelId is provided to getHotelDetails', async (t) => {
+  // Load environment variables
+  dotenv.config()
+
+  const trippe = new Trippe(process.env.API_KEY)
+
+  await t.throwsAsync(async () => {
+    await trippe.getHotelDetails('X')
+  }, {
+    message: 'Unknown or invalid hotelId'
+  })
+})
+
 test('Gets correct hotel details', async (t) => {
   // Load environment variables
   dotenv.config()
