@@ -82,20 +82,25 @@ export default class Trippe {
       .then(json => json.hotels[0])
       .then(hotel => {
         const { currencyCode, rates } = hotel
-        const ratesCombined = rates.flatMap(rate => rate.windows)
 
-        return dates.map(checkinDate => {
-          const points = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map(rate => rate.totalPoints))
-          const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
+        if (rates.length === 0) {
+          throw new Error('Unknown or invalid hotelId')
+        } else {
+          const ratesCombined = rates.flatMap(rate => rate.windows)
 
-          return {
-            hotelId,
-            checkinDate,
-            cashPrice: cashPrice < Infinity ? cashPrice : null,
-            currencyCode,
-            points: points < Infinity ? points : null
-          }
-        })
+          return dates.map(checkinDate => {
+            const points = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map(rate => rate.totalPoints))
+            const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
+
+            return {
+              hotelId,
+              checkinDate,
+              cashPrice: cashPrice < Infinity ? cashPrice : null,
+              currencyCode,
+              points: points < Infinity ? points : null
+            }
+          })
+        }
       })
   }
 
