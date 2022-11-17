@@ -7,7 +7,7 @@ test.before('Load environment variables', (t) => {
   dotenv.config()
 })
 
-test('Throws when no API key provided', (t) => {
+test('[constructor] Throws when no API key provided', (t) => {
   t.throws(() => {
     // eslint-disable-next-line no-unused-vars
     const trippe = new Trippe()
@@ -16,7 +16,7 @@ test('Throws when no API key provided', (t) => {
   })
 })
 
-test('Throws when no hotelId is provided to getHotelDetails', (t) => {
+test('[getHotelDetails] Throws when no hotelId is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
@@ -26,7 +26,7 @@ test('Throws when no hotelId is provided to getHotelDetails', (t) => {
   })
 })
 
-test('Throws when invalid or unknown hotelId is provided to getHotelDetails', async (t) => {
+test('[getHotelDetails] Throws when invalid or unknown hotelId is provided', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
@@ -36,7 +36,7 @@ test('Throws when invalid or unknown hotelId is provided to getHotelDetails', as
   })
 })
 
-test('Gets correctly formatted hotel details', async (t) => {
+test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
   const hotelDetails = await trippe.getHotelDetails('ANRAW')
 
@@ -52,7 +52,7 @@ test('Gets correctly formatted hotel details', async (t) => {
   t.false(Object.values(hotelDetails).includes(null))
 })
 
-test('Throws when no hotelId is provided to getHotelPrices', (t) => {
+test('[getHotelPrices] Throws when no hotelId is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
@@ -62,7 +62,7 @@ test('Throws when no hotelId is provided to getHotelPrices', (t) => {
   })
 })
 
-test('Throws when invalid or unknown hotelId is provided to getHotelPrices', async (t) => {
+test('[getHotelPrices] Throws when invalid or unknown hotelId is provided', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
@@ -72,7 +72,7 @@ test('Throws when invalid or unknown hotelId is provided to getHotelPrices', asy
   })
 })
 
-test('Throws when more than 60 days are requested from getHotelPrices', (t) => {
+test('[getHotelPrices] Throws when more than 60 days are requested', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
@@ -85,11 +85,52 @@ test('Throws when more than 60 days are requested from getHotelPrices', (t) => {
   })
 })
 
-test('Gets correctly formatted hotel prices', async (t) => {
+test('[getHotelPrices] Gets correctly formatted hotel prices', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
   const hotelPrices = await trippe.getHotelPrices('ANRAW', {})
 
   t.is(60, hotelPrices.length)
+})
+
+test('[getAreaPrices] Throws when no or invalid coordinates are provided', (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+
+  t.throws(() => {
+    trippe.getAreaPrices([])
+  }, {
+    message: 'Invalid format used for coordinates, please use [lng, lat]'
+  })
+
+  t.throws(() => {
+    trippe.getAreaPrices([50.5])
+  }, {
+    message: 'Invalid format used for coordinates, please use [lng, lat]'
+  })
+
+  t.throws(() => {
+    trippe.getAreaPrices([50.5, '50'])
+  }, {
+    message: 'Invalid format used for coordinates, please use [lng, lat]'
+  })
+})
+
+test('[getAreaPrices] Throws when checkinDate is incorrect', async (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+
+  await t.throwsAsync(async () => {
+    await trippe.getAreaPrices([4.39739, 51.22171], {
+      checkinDate: '22-11-19'
+    })
+  }, {
+    message: 'Invalid value for checkinDate (should be formatted as YYYY-MM-DD)'
+  })
+})
+
+test('[getAreaPrices] Gets correctly formatted hotel prices', async (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+  const hotelPrices = await trippe.getAreaPrices([4.397955750773747, 51.21847735675646], {})
+
+  t.false(hotelPrices.length === 0)
 })
 
 function getObjectTypes (obj) {

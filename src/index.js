@@ -1,5 +1,8 @@
 import got from 'got'
 import dayjs from 'dayjs'
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
+
+dayjs.extend(customParseFormat)
 
 export default class Trippe {
   #headers
@@ -111,14 +114,34 @@ export default class Trippe {
    * @param {object} options An object containing radius, unit and checkinDate parameters (all optional)
    * @returns {Promise<Array>}
   */
-  getAreaPrices ([longitude, latitude], {
+  getAreaPrices (coordinates, {
     radius = 100,
     unit = 'mi',
     checkinDate = dayjs().format('YYYY-MM-DD')
   } = {}) {
     const headers = this.#headers
     const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=summary,summary.rateRanges'
+
+    // Check coordinates
+    const validCoordinates = Array.isArray(coordinates) &&
+        coordinates.length === 2 &&
+        coordinates.every(d => typeof (d) === 'number')
+
+    if (!validCoordinates) throw new Error('Invalid format used for coordinates, please use [lng, lat]')
+
+    const [longitude, latitude] = coordinates
+
+    // Check checkinDate format
+    const isValidCheckinDate = dayjs(checkinDate, 'YYYY-MM-DD', true).isValid()
+    if (!isValidCheckinDate) throw new Error('Invalid value for checkinDate (should be formatted as YYYY-MM-DD)')
+
     const checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+
+    // Check distance unit
+    if (!['KM', 'MI'].includes(unit.toUpperCase())) throw new Error('Wrong distance unit provided')
+
+    // Check maximum distance
+    if (radius > 100) throw new Error('The value of radius should not be greater than 100')
 
     const json = {
       products: [
