@@ -1,7 +1,7 @@
 import test from 'ava'
 import dotenv from 'dotenv'
 
-import Trippe from './src/index.js'
+import Trippe from './index.js'
 
 test.before('Load environment variables', (t) => {
   dotenv.config()
