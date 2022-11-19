@@ -53,7 +53,7 @@ export default class Trippe {
   }
 
   /**
-   * Returns an array of prices (in points and in cash) per night for a period of up to 60 days
+   * Returns an array of lowest prices (in points and in cash) per night for a period of up to 60 days
    *
    * @param {string} hotelId The systemwide id of the hotel
    * @param {object} dates An object containing startDate and endDate keys (both optional)
@@ -108,7 +108,7 @@ export default class Trippe {
   }
 
   /**
-   * Returns an array of prices (in points and in cash) in a search area and for a given night
+   * Returns an array of lowest prices (in points and in cash) in a search area and for a given night
    *
    * @param {string} centrePoint The point (in [longitude, latitude] notation) to search from
    * @param {object} options An object containing radius, unit and checkinDate parameters (all optional)
