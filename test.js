@@ -52,6 +52,14 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
   t.false(Object.values(hotelDetails).includes(null))
 })
 
+test('[getDestinations] Gets correctly formatted list of destinations', async (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+  const destinations = await trippe.getDestinations('Ant')
+
+  t.true(Array.isArray(destinations))
+  t.true(destinations.map(destination => destination.display).includes('Antwerp, Belgium'))
+})
+
 test('[getHotelPrices] Throws when no hotelId is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 

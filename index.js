@@ -198,4 +198,30 @@ export default class Trippe {
         }
       }))
   }
+
+  /**
+   * Returns a list of destinations and their coordinates
+   *
+   * @param {string} query A query to autocomplete, at least 3 characters long
+   * @returns {Promise<Array>}
+   */
+  getDestinations (query) {
+    // Check that the query is 3 characters or longer
+    if (query.length < 3) throw new Error('Query string should be 3 characters or more')
+
+    const headers = this.#headers
+    const url = `https://apis.ihg.com/locations/v1/destinations?destination=${query}`
+
+    return got.get(url, { headers }).json()
+      .then(locations => {
+        return locations.map(location => {
+          const { longitude, latitude, clarifiedLocation: display } = location
+
+          return {
+            coordinates: [longitude, latitude],
+            display
+          }
+        })
+      })
+  }
 }
