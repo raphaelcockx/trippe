@@ -66,23 +66,23 @@ test('[getDestinations] Gets correctly formatted list of destinations', async (t
   t.true(destinations.map(destination => destination.display).includes('Antwerp, Belgium'))
 })
 
-test('[getHotelPrices] Throws when no hotelId is provided', (t) => {
+test('[getHotelPrices] Throws when no hotelCode is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
     trippe.getHotelPrices()
   }, {
-    message: 'hotelId is required'
+    message: 'hotelCode is required'
   })
 })
 
-test('[getHotelPrices] Throws when invalid or unknown hotelId is provided', async (t) => {
+test('[getHotelPrices] Throws when invalid or unknown hotelCode is provided', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
     await trippe.getHotelPrices('X', {})
   }, {
-    message: 'Unknown or invalid hotelId'
+    message: 'Unknown or invalid hotelCode'
   })
 })
 

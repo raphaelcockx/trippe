@@ -87,19 +87,19 @@ export default class Trippe {
   /**
    * Returns an array of lowest prices (in points and in cash) per night for a period of up to 60 days
    *
-   * @param {string} hotelId The systemwide id of the hotel
+   * @param {string} hotelCode The systemwide id of the hotel
    * @param {object} dates An object containing startDate and endDate keys (both optional)
    * @returns {Promise<Array>}
   */
-  getHotelPrices (hotelId, {
+  getHotelPrices (hotelCode, {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
   } = {}) {
     const headers = this.#headers
 
-    // Check if hotelId was provided
-    if (!hotelId) {
-      throw new Error('hotelId is required')
+    // Check if hotelCode was provided
+    if (!hotelCode) {
+      throw new Error('hotelCode is required')
     }
 
     // Calculate number of days
@@ -110,7 +110,7 @@ export default class Trippe {
       throw new Error('Please limit the number of days to 60 or less')
     }
 
-    const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelId.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
+    const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
     const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
 
     return got.get(url, { headers }).json()
@@ -119,7 +119,7 @@ export default class Trippe {
         const { currencyCode, rates } = hotel
 
         if (rates.length === 0) {
-          throw new Error('Unknown or invalid hotelId')
+          throw new Error('Unknown or invalid hotelCode')
         } else {
           const ratesCombined = rates.flatMap(rate => rate.windows)
 
@@ -128,7 +128,7 @@ export default class Trippe {
             const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
 
             return {
-              hotelId,
+              hotelCode,
               checkinDate,
               cashPrice: cashPrice < Infinity ? cashPrice : null,
               currencyCode,
@@ -216,13 +216,13 @@ export default class Trippe {
       .then(json => json.hotels)
       .then(hotels => hotels.filter(hotel => hotel.availabilityStatus === 'OPEN'))
       .then(hotels => hotels.map(hotel => {
-        const { hotelMnemonic: hotelId, propertyCurrency: currencyCode, lowestPointsOnlyCost, lowestCashOnlyCost } = hotel
+        const { hotelMnemonic: hotelCode, propertyCurrency: currencyCode, lowestPointsOnlyCost, lowestCashOnlyCost } = hotel
 
         const cashPrice = parseFloat(lowestCashOnlyCost.amountAfterTax)
         const points = lowestPointsOnlyCost ? lowestPointsOnlyCost.points : null
 
         return {
-          hotelId,
+          hotelCode,
           checkinDate,
           cashPrice,
           currencyCode,
