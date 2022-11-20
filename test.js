@@ -16,23 +16,23 @@ test('[constructor] Throws when no API key provided', (t) => {
   })
 })
 
-test('[getHotelDetails] Throws when no hotelId is provided', (t) => {
+test('[getHotelDetails] Throws when no hotelCode is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
     trippe.getHotelDetails()
   }, {
-    message: 'hotelId is required'
+    message: 'hotelCode is required'
   })
 })
 
-test('[getHotelDetails] Throws when invalid or unknown hotelId is provided', async (t) => {
+test('[getHotelDetails] Throws when invalid or unknown hotelCode is provided', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
     await trippe.getHotelDetails('X')
   }, {
-    message: 'Unknown or invalid hotelId'
+    message: 'Unknown or invalid hotelCode'
   })
 })
 
@@ -41,13 +41,19 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
   const hotelDetails = await trippe.getHotelDetails('ANRAW')
 
   t.deepEqual(getObjectTypes(hotelDetails), {
-    chain: 'string',
-    location: 'string',
+    hotelCode: 'string',
+    hotelName: 'string',
+    brandCode: 'string',
+    brandName: 'string',
+    description: 'object',
+    numberOfRooms: 'number',
     country: 'string',
-    latitude: 'number',
-    longitude: 'number',
+    coordinates: 'array',
     url: 'string'
   })
+
+  t.is(hotelDetails.brandCode.length, 4)
+  t.is(hotelDetails.country.length, 2)
 
   t.false(Object.values(hotelDetails).includes(null))
 })
@@ -134,5 +140,7 @@ test('[getAreaPrices] Gets correctly formatted hotel prices', async (t) => {
 })
 
 function getObjectTypes (obj) {
-  return Object.fromEntries(Object.entries(obj).map(([key, value]) => [key, typeof value]))
+  return Object.fromEntries(Object.entries(obj)
+    .map(([key, value]) => [key, Array.isArray(value) ? 'array' : typeof value])
+  )
 }

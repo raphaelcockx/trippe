@@ -4,6 +4,28 @@ import customParseFormat from 'dayjs/plugin/customParseFormat.js'
 
 dayjs.extend(customParseFormat)
 
+const brandCodes = {
+  ATWL: 'Atwell Suites',
+  AVID: 'avid Hotels',
+  CDLW: 'Candlewood Suites',
+  HICP: 'Crowne Plaza',
+  EVEN: 'EVEN Hotels',
+  HOLI: 'Holiday Inn',
+  HICV: 'Holiday Inn Club Vacations',
+  HIEX: 'Holiday Inn Express',
+  HEXS: 'Holiday Inn Express & Suites',
+  INDG: 'Hotel Indigo',
+  HLUX: 'HUALUXE',
+  ICON: 'InterContinental',
+  KIKI: 'Kimpton',
+  MRMS: 'Mr & Mrs Smith',
+  RGNT: 'Regent',
+  SIXS: 'Six Senses',
+  STAY: 'Staybridge Suites',
+  LXLX: 'Vignette Collection',
+  VXVX: 'voco'
+}
+
 export default class Trippe {
   #headers
 
@@ -22,33 +44,43 @@ export default class Trippe {
   /**
    * Gets basic info on a hotel
    *
-   * @param {string} hotelId The systemwide id of the hotel
+   * @param {string} hotelCode The systemwide id (mnemonic) of the hotel
    * @returns {Promise<Object>}
   */
-  getHotelDetails (hotelId) {
-    // Check if hotelId was provided
-    if (!hotelId) {
-      throw new Error('hotelId is required')
+  getHotelDetails (hotelCode) {
+    // Check if hotelCode was provided
+    if (!hotelCode) {
+      throw new Error('hotelCode is required')
     }
 
     const headers = this.#headers
-    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelId}/details?fieldset=brandInfo,profile,address`
+    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelCode}/details?fieldset=brandInfo,profile,address`
 
     return got.get(url, { headers }).json()
       .then(json => json.hotelInfo)
       .then(hotelInfo => {
         const { brandInfo, profile, address } = hotelInfo
+
+        const { brandCode } = brandInfo
+        const { roomsIncludingSuitesCount, latLong, name, shortDescription, longDescription } = profile
+
         return {
-          chain: brandInfo.brandName,
-          location: profile.name,
+          hotelCode,
+          hotelName: name,
+          brandCode,
+          brandName: brandCodes[brandCode],
+          description: {
+            long: longDescription,
+            short: shortDescription
+          },
+          numberOfRooms: roomsIncludingSuitesCount,
           country: address.country.code,
-          latitude: profile.latLong.latitude,
-          longitude: profile.latLong.longitude,
+          coordinates: [latLong.longitude, latLong.latitude],
           url: `https://${address.consumerFriendlyURL}`
         }
       })
       .catch((err) => {
-        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'Unknown or invalid hotelId' : err)
+        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'Unknown or invalid hotelCode' : err)
       })
   }
 
