@@ -147,6 +147,28 @@ test('[getAreaPrices] Gets correctly formatted hotel prices', async (t) => {
   t.false(hotelPrices.length === 0)
 })
 
+test('[getStayPrices] Throws when invalid or unknown hotelCode is provided', async (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+
+  await t.throwsAsync(async () => {
+    await trippe.getStayPrices('X', {})
+  }, {
+    message: 'No valid data received. Check hotelCode and make sure there is availability for every night covered by the request.'
+  })
+})
+
+test('[getStayPrices] Throws when checkinDate is incorrect', async (t) => {
+  const trippe = new Trippe(process.env.API_KEY)
+
+  await t.throwsAsync(async () => {
+    await trippe.getStayPrices('ANRAW', {
+      checkinDate: '22-11-19'
+    })
+  }, {
+    message: 'Invalid value for checkinDate (should be formatted as YYYY-MM-DD)'
+  })
+})
+
 function getObjectTypes (obj) {
   return Object.fromEntries(Object.entries(obj)
     .map(([key, value]) => [key, Array.isArray(value) ? 'array' : typeof value])

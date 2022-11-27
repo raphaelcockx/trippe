@@ -140,6 +140,140 @@ export default class Trippe {
   }
 
   /**
+   * Returns an object containing arrays of available products, available rate plans and available prices
+   * (in cash and points) for a specific hotel on specific dates
+   *
+   * @param {string} hotelCode The systemwide id of the hotel
+   * @param {object} dates An object containing checkinDate and checkoutDate (both optional)
+   * @returns {Promise<Object>}
+  */
+  getStayPrices (hotelCode, {
+    checkinDate = dayjs().format('YYYY-MM-DD'),
+    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+  } = {}) {
+    const headers = this.#headers
+
+    // Check if hotelCode was provided
+    if (!hotelCode) {
+      throw new Error('hotelCode is required')
+    }
+
+    // Check checkinDate format
+    const isValidCheckinDate = dayjs(checkinDate, 'YYYY-MM-DD', true).isValid()
+    if (!isValidCheckinDate) throw new Error('Invalid value for checkinDate (should be formatted as YYYY-MM-DD)')
+
+    const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=rateDetails,rateDetails.policies,rateDetails.bonusRates,rateDetails.upsells'
+
+    const json = {
+      products: [
+        {
+          productCode: 'SR',
+          guestCounts: [
+            {
+              otaCode: 'AQC10',
+              count: 1
+            },
+            {
+              otaCode: 'AQC8',
+              count: 0
+            }],
+          startDate: checkinDate,
+          endDate: checkoutDate,
+          quantity: 1
+        }
+      ],
+      startDate: checkinDate,
+      endDate: checkoutDate,
+      hotelMnemonics: [hotelCode],
+      rates: {
+        ratePlanCodes: [
+          {
+            internal: 'IVANI'
+          }
+        ]
+      },
+      options: {
+        disabilityMode: 'ACCESSIBLE_AND_NON_ACCESSIBLE',
+        returnAdditionalRatePlanDescriptions: true
+      }
+    }
+
+    return got.post(url, { headers, json, retry: { methods: ['POST'] } }).json()
+      .then(json => json.hotels[0])
+      .then(hotelData => {
+        // Get list of products offered
+        const { productDefinitions } = hotelData
+
+        const products = productDefinitions
+          .filter((productDefinition) => 'inventoryTypeName' in productDefinition && productDefinition.isAvailable)
+          .map((productDefinition) => {
+            return {
+              productCode: productDefinition.inventoryTypeCode,
+              productName: productDefinition.inventoryTypeName,
+              productDescription: productDefinition.description.trim(),
+              productIsPremium: productDefinition.isPremium
+            }
+          })
+
+        const currency = hotelData.propertyCurrency
+
+        // Get a list of ratePlans offered
+        const { ratePlanDefinitions } = hotelData
+
+        const ratePlans = ratePlanDefinitions
+          .filter((ratePlanDefinition) => 'additionalDescriptions' in ratePlanDefinition)
+          .map((ratePlanDefinition) => {
+            return {
+              rateCode: ratePlanDefinition.code,
+              rateName: ratePlanDefinition.additionalDescriptions.longRateName,
+              rateDescription: ratePlanDefinition.additionalDescriptions.longRateDesc
+            }
+          })
+
+        // Check rates per room type
+        const { rateDetails } = hotelData
+
+        const prices = rateDetails.offers.map((offer) => {
+          const productCode = offer.productUses[0].inventoryTypeCode
+          const rateCode = offer.ratePlanCode
+
+          const ratePrice = 'rewardNights' in offer ? null : parseFloat(offer.productUses[0].rates.totalRate.average.amountAfterTax)
+          const ratePoints = 'rewardNights' in offer
+            ? [{
+                points: offer.rewardNights.pointsOnly.averageDailyPoints,
+                cash: 0
+              },
+              ...offer.rewardNights.pointsCash.options.map((option) => {
+                return {
+                  points: option.averageDailyPoints,
+                  cash: option.averageDailyCash
+                }
+              })
+              ]
+            : null
+
+          return {
+            productCode,
+            rateCode,
+            ratePrice,
+            ratePoints
+          }
+        })
+
+        return {
+          products,
+          ratePlans,
+          currency,
+          prices: prices.sort((a, b) => a.ratePrice < b.ratePrice ? -1 : 1),
+          dump: hotelData
+        }
+      })
+      .catch((err) => {
+        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'No valid data received. Check hotelCode and make sure there is availability for every night covered by the request.' : err)
+      })
+  }
+
+  /**
    * Returns an array of lowest prices (in points and in cash) in a search area and for a given night
    *
    * @param {string} centrePoint The point (in [longitude, latitude] notation) to search from

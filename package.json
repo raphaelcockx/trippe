@@ -32,6 +32,7 @@
   },
   "dependencies": {
     "dayjs": "^1.11.6",
-    "got": "^12.5.2"
+    "got": "^12.5.2",
+    "lodash.round": "^4.0.4"
   }
 }
