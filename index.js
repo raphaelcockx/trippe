@@ -198,7 +198,24 @@ export default class Trippe {
       }
     }
 
-    return got.post(url, { headers, json, retry: { methods: ['POST'] } }).json()
+    return got.post(url, { headers, json, retry: { methods: ['POST'] }, throwHttpErrors: false })
+      .then(response => {
+        if (response.statusCode !== 200) {
+          const errors = JSON.parse(response.body).errors
+
+          if (errors.map((error) => error.code).includes('INVALID_HOTEL_MNEMONICS')) {
+            throw new Error('Unknown or invalid hotelCode')
+          } else if (errors.map((error) => error.code).includes('CRS_50025')) {
+            throw new Error('Unknown or invalid hotelCode')
+          } else if (errors.map((error) => error.code).includes('CRS_50025')) {
+            throw new Error('No availabilty for your search')
+          } else {
+            throw new Error(errors[0].message)
+          }
+        } else {
+          return JSON.parse(response.body)
+        }
+      })
       .then(json => json.hotels[0])
       .then(hotelData => {
         // Get list of products offered
@@ -266,9 +283,6 @@ export default class Trippe {
           currency,
           prices: prices.sort((a, b) => a.ratePrice < b.ratePrice ? -1 : 1)
         }
-      })
-      .catch((err) => {
-        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'No valid data received. Check hotelCode and make sure there is availability for every night covered by the request.' : err)
       })
   }
 

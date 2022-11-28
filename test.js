@@ -153,7 +153,7 @@ test('[getStayPrices] Throws when invalid or unknown hotelCode is provided', asy
   await t.throwsAsync(async () => {
     await trippe.getStayPrices('X', {})
   }, {
-    message: 'No valid data received. Check hotelCode and make sure there is availability for every night covered by the request.'
+    message: 'Unknown or invalid hotelCode'
   })
 })
 
