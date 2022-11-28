@@ -264,8 +264,7 @@ export default class Trippe {
           products,
           ratePlans,
           currency,
-          prices: prices.sort((a, b) => a.ratePrice < b.ratePrice ? -1 : 1),
-          dump: hotelData
+          prices: prices.sort((a, b) => a.ratePrice < b.ratePrice ? -1 : 1)
         }
       })
       .catch((err) => {
