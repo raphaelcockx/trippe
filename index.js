@@ -255,19 +255,25 @@ export default class Trippe {
           const rateCode = offer.ratePlanCode
 
           const ratePrice = 'rewardNights' in offer ? null : parseFloat(offer.productUses[0].rates.totalRate.average.amountAfterTax)
-          const ratePoints = 'rewardNights' in offer
-            ? [{
-                points: offer.rewardNights.pointsOnly.averageDailyPoints,
-                cash: 0
-              },
-              ...offer.rewardNights.pointsCash.options.map((option) => {
+
+          let ratePoints = null
+
+          if ('rewardNights' in offer) {
+            const noCash = {
+              points: offer.rewardNights.pointsOnly.averageDailyPoints,
+              cash: 0
+            }
+
+            const cashOptions = 'options' in offer.rewardNights.pointsCash
+              ? offer.rewardNights.pointsCash.options.map((option) => {
                 return {
                   points: option.averageDailyPoints,
                   cash: option.averageDailyCash
                 }
               })
-              ]
-            : null
+              : []
+            ratePoints = [noCash, ...cashOptions]
+          }
 
           return {
             productCode,
