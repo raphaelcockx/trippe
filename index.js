@@ -231,7 +231,7 @@ export default class Trippe {
             return {
               productCode: productDefinition.inventoryTypeCode,
               productName: productDefinition.inventoryTypeName,
-              productDescription: productDefinition.description.trim(),
+              productDescription: productDefinition.description ? productDefinition.description.trim() : null,
               productIsPremium: productDefinition.isPremium
             }
           })
