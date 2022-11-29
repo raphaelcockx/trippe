@@ -74,6 +74,9 @@ export default class Trippe {
             short: shortDescription
           },
           numberOfRooms: roomsIncludingSuitesCount,
+          street: [address.street1, address.street4].filter((d) => d),
+          zip: address.zip,
+          city: address.city,
           country: address.country.code,
           coordinates: [latLong.longitude, latLong.latitude],
           url: `https://${address.consumerFriendlyURL}`

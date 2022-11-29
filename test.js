@@ -47,6 +47,9 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
     brandName: 'string',
     description: 'object',
     numberOfRooms: 'number',
+    street: 'array',
+    zip: 'string',
+    city: 'string',
     country: 'string',
     coordinates: 'array',
     url: 'string'
