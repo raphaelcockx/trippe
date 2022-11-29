@@ -77,6 +77,7 @@ export default class Trippe {
           street: [address.street1, address.street4].filter((d) => d),
           zip: address.zip,
           city: address.city,
+          state: 'code' in address.state ? address.state.code : null,
           country: address.country.code,
           coordinates: [latLong.longitude, latLong.latitude],
           url: `https://${address.consumerFriendlyURL}`
