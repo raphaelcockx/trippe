@@ -413,4 +413,27 @@ export default class Trippe {
         })
       })
   }
+
+  /**
+   * Returns a url that will show the room and rate options for the given hotel
+   * with the givebn check in and check out dates
+   *
+   * @param {string} hotelCode The systemwide id of the hotel
+   * @param {object} dates An object containing startDate and endDate keys (both optional)
+   * @returns {Promise<Array>}
+   */
+  getBookingPageUrl (hotelCode, {
+    checkinDate = dayjs().format('YYYY-MM-DD'),
+    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+  } = {}) {
+    const checkinDateElements = checkinDate.split('-')
+    const checkinDay = checkinDateElements[2]
+    const checkinMonthYear = `${(+checkinDateElements[1] - 1).toString().padStart(2, '0')}${checkinDateElements[0]}`
+
+    const checkoutDateElements = checkoutDate.split('-')
+    const checkoutDay = checkoutDateElements[2]
+    const checkoutMonthYear = `${(+checkoutDateElements[1] - 1).toString().padStart(2, '0')}${checkoutDateElements[0]}`
+
+    return `https://www.ihg.com/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qSlH=${hotelCode}&qRms=1&qAdlt=1&qChld=0&qCiD=${checkinDay}&qCiMy=${checkinMonthYear}&qCoD=${checkoutDay}&qCoMy=${checkoutMonthYear}`
+  }
 }
