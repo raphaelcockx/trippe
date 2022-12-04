@@ -50,6 +50,7 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
     street: 'array',
     zip: 'string',
     city: 'string',
+    state: 'object',
     country: 'string',
     coordinates: 'array',
     url: 'string'
@@ -57,8 +58,6 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
 
   t.is(hotelDetails.brandCode.length, 4)
   t.is(hotelDetails.country.length, 2)
-
-  t.false(Object.values(hotelDetails).includes(null))
 })
 
 test('[getDestinations] Gets correctly formatted list of destinations', async (t) => {
@@ -69,31 +68,31 @@ test('[getDestinations] Gets correctly formatted list of destinations', async (t
   t.true(destinations.map(destination => destination.display).includes('Antwerp, Belgium'))
 })
 
-test('[getHotelPrices] Throws when no hotelCode is provided', (t) => {
+test('[getLowestHotelPrices] Throws when no hotelCode is provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
-    trippe.getHotelPrices()
+    trippe.getLowestHotelPrices()
   }, {
     message: 'hotelCode is required'
   })
 })
 
-test('[getHotelPrices] Throws when invalid or unknown hotelCode is provided', async (t) => {
+test('[getLowestHotelPrices] Throws when invalid or unknown hotelCode is provided', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
-    await trippe.getHotelPrices('X', {})
+    await trippe.getLowestHotelPrices('X', {})
   }, {
     message: 'Unknown or invalid hotelCode'
   })
 })
 
-test('[getHotelPrices] Throws when more than 60 days are requested', (t) => {
+test('[getLowestHotelPrices] Throws when more than 60 days are requested', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
-    trippe.getHotelPrices('ANRAW', {
+    trippe.getLowestHotelPrices('ANRAW', {
       startDate: '2023-01-01',
       endDate: '2023-12-31'
     })
@@ -102,40 +101,40 @@ test('[getHotelPrices] Throws when more than 60 days are requested', (t) => {
   })
 })
 
-test('[getHotelPrices] Gets correctly formatted hotel prices', async (t) => {
+test('[getLowestHotelPrices] Gets correctly formatted hotel prices', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
-  const hotelPrices = await trippe.getHotelPrices('ANRAW', {})
+  const hotelPrices = await trippe.getLowestHotelPrices('ANRAW', {})
 
   t.is(60, hotelPrices.length)
 })
 
-test('[getAreaPrices] Throws when no or invalid coordinates are provided', (t) => {
+test('[getLowestAreaPrices] Throws when no or invalid coordinates are provided', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
-    trippe.getAreaPrices([])
+    trippe.getLowestAreaPrices([])
   }, {
     message: 'Invalid format used for coordinates, please use [lng, lat]'
   })
 
   t.throws(() => {
-    trippe.getAreaPrices([50.5])
+    trippe.getLowestAreaPrices([50.5])
   }, {
     message: 'Invalid format used for coordinates, please use [lng, lat]'
   })
 
   t.throws(() => {
-    trippe.getAreaPrices([50.5, '50'])
+    trippe.getLowestAreaPrices([50.5, '50'])
   }, {
     message: 'Invalid format used for coordinates, please use [lng, lat]'
   })
 })
 
-test('[getAreaPrices] Throws when checkinDate is incorrect', async (t) => {
+test('[getLowestAreaPrices] Throws when checkinDate is incorrect', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   await t.throwsAsync(async () => {
-    await trippe.getAreaPrices([4.39739, 51.22171], {
+    await trippe.getLowestAreaPrices([4.39739, 51.22171], {
       checkinDate: '22-11-19'
     })
   }, {
@@ -143,9 +142,9 @@ test('[getAreaPrices] Throws when checkinDate is incorrect', async (t) => {
   })
 })
 
-test('[getAreaPrices] Gets correctly formatted hotel prices', async (t) => {
+test('[getLowestAreaPrices] Gets correctly formatted hotel prices', async (t) => {
   const trippe = new Trippe(process.env.API_KEY)
-  const hotelPrices = await trippe.getAreaPrices([4.397955750773747, 51.21847735675646], {})
+  const hotelPrices = await trippe.getLowestAreaPrices([4.397955750773747, 51.21847735675646], {})
 
   t.false(hotelPrices.length === 0)
 })
