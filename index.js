@@ -56,7 +56,7 @@ export default class Trippe {
    * @property {string} brandName The brand name of the (sub)chain the hotel belongs to
    * @property {hotelDescription} description A description of the property, in two formats
    * @property {number} numberOfRooms The number of available rooms
-   * @property {string} closestCity The closests city to the hotel (may be the actual city of the address)
+   * @property {string} closestCity The closest city to the hotel (may be the actual city of the address)
    * @property {Array} street The street part of the property address, with one entry for each line needed (maximum 2)
    * @property {string} zip The zipcode of the property
    * @property {string} city The city the hotel is in
@@ -122,12 +122,19 @@ export default class Trippe {
   }
 
   /**
-   * Returns an array of lowest prices (in points and in cash) per night for a period of up to 60 days
+   * Returns an array of lowest prices (in points and in cash) for a single hotel - per night and for a period of up to 60 days
+   * Note that the rates that this method returns don't always include (all) taxes
    *
    * @param {string} hotelCode The systemwide id of the hotel
-   * @param {object} dates An object containing startDate and endDate keys (both optional)
+   * @param {startEndDates} dates An object containing startDate and endDate keys (both optional)
    * @returns {Promise<Array[lowestPriceDay]>}
   */
+
+  /**
+   * @typedef {Object} startEndDates
+   * @property {string} startDate The date (check in date) from which to start searching, defaults to today
+   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 59 days
+   */
 
   /**
    * @typedef {Object} lowestPriceDay
@@ -190,9 +197,18 @@ export default class Trippe {
    * (in cash and points) for a specific hotel on specific dates
    *
    * @param {string} hotelCode The systemwide id of the hotel
-   * @param {object} dates An object containing checkinDate and checkoutDate (both optional)
+   * @param {startEndDatesAndGuests} options
    * @returns {Promise<Object>}
   */
+
+  /**
+   * @typedef {Object} startEndDatesAndGuests
+   * @property {string} startDate The date (check in date) from which to start searching, defaults to today
+   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 59 days
+   * @property {number} adults The number of adult guests in the room
+   * @property {number} children The number of children in the room
+   */
+
   getStayPrices (hotelCode, {
     adults = 1,
     children = 0,
@@ -302,32 +318,32 @@ export default class Trippe {
           const productCode = offer.productUses[0].inventoryTypeCode
           const rateCode = offer.ratePlanCode
 
-          const ratePrice = 'rewardNights' in offer ? null : parseFloat(offer.productUses[0].rates.totalRate.average.amountAfterTax)
+          const cashPrice = 'rewardNights' in offer ? null : parseFloat(offer.productUses[0].rates.totalRate.average.amountAfterTax)
 
-          let ratePoints = null
+          let points = null
 
           if ('rewardNights' in offer) {
             const noCash = {
               points: offer.rewardNights.pointsOnly.averageDailyPoints,
-              cash: 0
+              cashPrice: 0
             }
 
             const cashOptions = 'options' in offer.rewardNights.pointsCash
               ? offer.rewardNights.pointsCash.options.map((option) => {
                 return {
                   points: option.averageDailyPoints,
-                  cash: option.averageDailyCash
+                  cashPrice: option.averageDailyCash
                 }
               })
               : []
-            ratePoints = [noCash, ...cashOptions]
+            points = [noCash, ...cashOptions]
           }
 
           return {
             productCode,
             rateCode,
-            ratePrice,
-            ratePoints
+            cashPrice,
+            points
           }
         })
 
