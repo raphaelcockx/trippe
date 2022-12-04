@@ -95,7 +95,7 @@ export default class Trippe {
    * @param {object} dates An object containing startDate and endDate keys (both optional)
    * @returns {Promise<Array>}
   */
-  getHotelPrices (hotelCode, {
+  getLowestHotelPrices (hotelCode, {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
   } = {}) {
@@ -303,7 +303,7 @@ export default class Trippe {
    * @param {object} options An object containing radius, unit and checkinDate parameters (all optional)
    * @returns {Promise<Array>}
   */
-  getAreaPrices (coordinates, {
+  getLowestAreaPrices (coordinates, {
     radius = 100,
     unit = 'mi',
     checkinDate = dayjs().format('YYYY-MM-DD')
