@@ -54,14 +54,15 @@ export default class Trippe {
     }
 
     const headers = this.#headers
-    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelCode}/details?fieldset=brandInfo,profile,address`
+    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
 
     return got.get(url, { headers }).json()
       .then(json => json.hotelInfo)
       .then(hotelInfo => {
-        const { brandInfo, profile, address } = hotelInfo
+        const { brandInfo, location, profile, address } = hotelInfo
 
         const { brandCode } = brandInfo
+        const { closestCity } = location
         const { roomsIncludingSuitesCount, latLong, name, shortDescription, longDescription } = profile
 
         return {
@@ -74,6 +75,7 @@ export default class Trippe {
             short: shortDescription
           },
           numberOfRooms: roomsIncludingSuitesCount,
+          closestCity,
           street: [address.street1, address.street4].filter((d) => d),
           zip: address.zip,
           city: address.city,
