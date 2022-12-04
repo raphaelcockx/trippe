@@ -194,6 +194,8 @@ export default class Trippe {
    * @returns {Promise<Object>}
   */
   getStayPrices (hotelCode, {
+    adults = 1,
+    children = 0,
     checkinDate = dayjs().format('YYYY-MM-DD'),
     checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
   } = {}) {
@@ -217,11 +219,11 @@ export default class Trippe {
           guestCounts: [
             {
               otaCode: 'AQC10',
-              count: 1
+              count: adults
             },
             {
               otaCode: 'AQC8',
-              count: 0
+              count: children
             }],
           startDate: checkinDate,
           endDate: checkoutDate,
@@ -348,7 +350,9 @@ export default class Trippe {
   getLowestAreaPrices (coordinates, {
     radius = 100,
     unit = 'mi',
-    checkinDate = dayjs().format('YYYY-MM-DD')
+    checkinDate = dayjs().format('YYYY-MM-DD'),
+    adults = 1,
+    children = 0
   } = {}) {
     const headers = this.#headers
     const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=summary,summary.rateRanges'
@@ -381,11 +385,11 @@ export default class Trippe {
           guestCounts: [
             {
               otaCode: 'AQC10',
-              count: 1
+              count: adults
             },
             {
               otaCode: 'AQC8',
-              count: 0
+              count: children
             }
           ],
           quantity: 1
@@ -466,7 +470,9 @@ export default class Trippe {
    */
   getBookingPageUrl (hotelCode, {
     checkinDate = dayjs().format('YYYY-MM-DD'),
-    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD'),
+    adults = 1,
+    children = 0
   } = {}) {
     const checkinDateElements = checkinDate.split('-')
     const checkinDay = checkinDateElements[2]
@@ -476,6 +482,6 @@ export default class Trippe {
     const checkoutDay = checkoutDateElements[2]
     const checkoutMonthYear = `${(+checkoutDateElements[1] - 1).toString().padStart(2, '0')}${checkoutDateElements[0]}`
 
-    return `https://www.ihg.com/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qSlH=${hotelCode}&qRms=1&qAdlt=1&qChld=0&qCiD=${checkinDay}&qCiMy=${checkinMonthYear}&qCoD=${checkoutDay}&qCoMy=${checkoutMonthYear}`
+    return `https://www.ihg.com/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qSlH=${hotelCode}&qRms=1&qAdlt=${adults}&qChld=${children}&qCiD=${checkinDay}&qCiMy=${checkinMonthYear}&qCoD=${checkoutDay}&qCoMy=${checkoutMonthYear}`
   }
 }
