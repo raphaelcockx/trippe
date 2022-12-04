@@ -45,8 +45,39 @@ export default class Trippe {
    * Gets basic info on a hotel
    *
    * @param {string} hotelCode The systemwide id (mnemonic) of the hotel
-   * @returns {Promise<Object>}
+   * @returns {Promise<hotelDetails>}
   */
+
+  /**
+   * @typedef {Object} hotelDetails
+   * @property {string} hotelCode The systemwide id (mnemonic) of the hotel
+   * @property {string} hotelName The name of the hotel, not taking into account the brand name of the chain it belongs to
+   * @property {string} brandCode The code of the (sub)chain the hotel belongs to
+   * @property {string} brandName The brand name of the (sub)chain the hotel belongs to
+   * @property {hotelDescription} description A description of the property, in two formats
+   * @property {number} numberOfRooms The number of available rooms
+   * @property {string} closestCity The closests city to the hotel (may be the actual city of the address)
+   * @property {Array} street The street part of the property address, with one entry for each line needed (maximum 2)
+   * @property {string} zip The zipcode of the property
+   * @property {string} city The city the hotel is in
+   * @property {state|null} state The state part of the address, null when not locally used
+   * @property {string} country The country the hotel is in, expressed as a ISO 3166-1 alpha-2 code
+   * @property {Array} coordinates The coordinates of the hotel, expressed as [longitude, latitude]
+   * @property {string} url The url of the hotels homepage
+   */
+
+  /**
+   * @typedef {Object} hotelDescription
+   * @property {string} long The long description of the property
+   * @property {string} short The short description of the property
+   */
+
+  /**
+   * @typedef {Object} state
+   * @property {string} code The (local) shorthand used
+   * @property {string} name The full name
+   */
+
   getHotelDetails (hotelCode) {
     // Check if hotelCode was provided
     if (!hotelCode) {
@@ -95,8 +126,17 @@ export default class Trippe {
    *
    * @param {string} hotelCode The systemwide id of the hotel
    * @param {object} dates An object containing startDate and endDate keys (both optional)
-   * @returns {Promise<Array>}
+   * @returns {Promise<Array[lowestPriceDay]>}
   */
+
+  /**
+   * @typedef {Object} lowestPriceDay
+   * @property {string} hotelCode The systemwide id (mnemonic) of the hotel
+   * @property {string} checkinDate The check in date
+   * @property {number|null} cashPrice The lowest cash price available - not including (some) taxes for a one night stay, null if no rooms available
+   * @property {string} currecyCode The cuirrency used for the cashPrice above
+   * @property {number|null} points The lowest number of points available to book a reward night with points only, null if no reward nights are available
+   */
   getLowestHotelPrices (hotelCode, {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
