@@ -1,7 +1,8 @@
 import got from 'got'
 import dayjs from 'dayjs'
-import customParseFormat from 'dayjs/plugin/customParseFormat.js'
+import { readPackageSync } from 'read-pkg'
 
+import customParseFormat from 'dayjs/plugin/customParseFormat.js'
 dayjs.extend(customParseFormat)
 
 const brandCodes = {
@@ -36,8 +37,11 @@ export default class Trippe {
     }
 
     // Set headers
+    const { version } = readPackageSync()
+
     this.#headers = {
-      'x-ihg-api-key': apiKey
+      'x-ihg-api-key': apiKey,
+      'user-agent': `Trippe v${version}`
     }
   }
 
