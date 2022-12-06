@@ -1,8 +1,8 @@
 {
   "name": "trippe",
   "version": "0.1.0",
-  "description": "Unofficial API wrapper to check hotel prices and reward nights availability - suitable for an intercontinental lifestyle.",
-  "license": "UNLICENSED",
+  "description": "Unofficial API client to check hotel prices and reward nights availability - suitable for an intercontinental lifestyle.",
+  "license": "GPLV3",
   "author": "Raphael Cockx",
   "type": "module",
   "exports": "./index.js",
@@ -35,7 +35,6 @@
   "dependencies": {
     "dayjs": "^1.11.6",
     "got": "^12.5.2",
-    "lodash.round": "^4.0.4",
     "read-pkg": "^7.1.0"
   }
 }
