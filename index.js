@@ -41,7 +41,7 @@ export default class Trippe {
 
     this.#headers = {
       'x-ihg-api-key': apiKey,
-      'user-agent': `Trippe v${version}`
+      'user-agent': `Trippe v${version} (https://example.com)`
     }
   }
 
