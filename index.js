@@ -41,7 +41,7 @@ export default class Trippe {
 
     this.#headers = {
       'x-ihg-api-key': apiKey,
-      'user-agent': `Trippe v${version} (https://example.com)`
+      'user-agent': `Trippe v${version} (https://github.com/raphaelcockx/trippe)`
     }
   }
 
@@ -62,12 +62,12 @@ export default class Trippe {
    * @property {number} numberOfRooms The number of available rooms
    * @property {string} closestCity The closest city to the hotel (may be the actual city of the address)
    * @property {Array} street The street part of the property address, with one entry for each line needed (maximum 2)
-   * @property {string} zip The zipcode of the property
+   * @property {string} postalCode The postal code of the property
    * @property {string} city The city the hotel is in
    * @property {state|null} state The state part of the address, null when not locally used
    * @property {string} country The country the hotel is in, expressed as a ISO 3166-1 alpha-2 code
    * @property {Array} coordinates The coordinates of the hotel, expressed as [longitude, latitude]
-   * @property {string} url The url of the hotels homepage
+   * @property {string} url The url of the hotel's homepage
    */
 
   /**
@@ -112,7 +112,7 @@ export default class Trippe {
           numberOfRooms: roomsIncludingSuitesCount,
           closestCity,
           street: [address.street1, address.street4].filter((d) => d),
-          zip: address.zip,
+          postalCode: address.zip,
           city: address.city,
           state: 'code' in address.state ? address.state.code : null,
           country: address.country.code,
@@ -185,7 +185,6 @@ export default class Trippe {
             const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
 
             return {
-              hotelCode,
               checkinDate,
               cashPrice: cashPrice < Infinity ? cashPrice : null,
               currencyCode,
@@ -214,10 +213,10 @@ export default class Trippe {
    */
 
   getStayPrices (hotelCode, {
-    adults = 1,
-    children = 0,
     checkinDate = dayjs().format('YYYY-MM-DD'),
-    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD')
+    checkoutDate = dayjs(checkinDate).add(1, 'day').format('YYYY-MM-DD'),
+    adults = 1,
+    children = 0
   } = {}) {
     const headers = this.#headers
 
@@ -446,7 +445,6 @@ export default class Trippe {
 
         return {
           hotelCode,
-          checkinDate,
           cashPrice,
           currencyCode,
           points

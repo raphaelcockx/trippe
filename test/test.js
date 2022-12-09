@@ -49,7 +49,7 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
     numberOfRooms: 'number',
     closestCity: 'string',
     street: 'array',
-    zip: 'string',
+    postalCode: 'string',
     city: 'string',
     state: 'object',
     country: 'string',
