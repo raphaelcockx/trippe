@@ -1,6 +1,6 @@
 {
   "name": "trippe",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Unofficial API client to check hotel prices and reward nights availability - suitable for an intercontinental lifestyle.",
   "license": "GPLV3",
   "author": "Raphael Cockx",
@@ -11,7 +11,7 @@
   },
   "homepage": "https://github.com/raphaelcockx/trippe",
   "repository": "raphaelcockx/trippe",
-	"bugs": "https://github.com/raphaelcockx/trippe/issues",
+  "bugs": "https://github.com/raphaelcockx/trippe/issues",
   "scripts": {
     "test": "ava",
     "prepare": "husky install"
