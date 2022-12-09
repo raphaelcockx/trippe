@@ -9,6 +9,9 @@
   "engines": {
     "node": ">=14.19 <15 || >=16.15 <17 || >=18"
   },
+  "homepage": "https://github.com/raphaelcockx/trippe",
+  "repository": "raphaelcockx/trippe",
+	"bugs": "https://github.com/raphaelcockx/trippe/issues",
   "scripts": {
     "test": "ava",
     "prepare": "husky install"
@@ -20,7 +23,8 @@
     "hotels",
     "api",
     "travel",
-    "tourism"
+    "tourism",
+    "hospitality"
   ],
   "devDependencies": {
     "ava": "^5.0.1",
