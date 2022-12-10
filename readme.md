@@ -123,6 +123,8 @@ Finally, the combinations of products and rate plans being offered are listed in
 | cashPrice | Number | The room price in the hotel's currency. Will be null for reward rates |
 | points | Array or null | The room price in points, including points and cash offers - formatted as an array of objects with `points` and `cashPrice` keys. Will be null if the `rateCode` refers to a cash rate |
 
+Please note that any `cashPrice` included as part of a cash and points offers will **always** be in US Dollars!
+
 ---
 ### `getDestinations(query)`
 
