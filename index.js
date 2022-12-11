@@ -272,7 +272,7 @@ export default class Trippe {
 
           if (errors.map((error) => error.code).includes('INVALID_HOTEL_MNEMONICS')) {
             throw new Error('Unknown or invalid hotelCode')
-          } else if (errors.map((error) => error.code).includes('CRS_50025')) {
+          } else if (errors.map((error) => error.code).includes('CRS_50010')) {
             throw new Error('Unknown or invalid hotelCode')
           } else if (errors.map((error) => error.code).includes('CRS_50025')) {
             throw new Error('No availabilty for your search')
