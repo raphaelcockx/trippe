@@ -117,7 +117,7 @@ export default class Trippe {
           state: 'code' in address.state ? address.state.code : null,
           country: address.country.code,
           coordinates: [latLong.longitude, latLong.latitude],
-          url: `https://${address.consumerFriendlyURL}`
+          url: address.consumerFriendlyURL ? `https://${address.consumerFriendlyURL}` : null
         }
       })
       .catch((err) => {
