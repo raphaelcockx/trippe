@@ -192,7 +192,7 @@ Returns a Promise that will resolve with an array of objects each containing the
 ---
 ### `getLowestHotelPrices(hotelCode, [options])`
 
-The `getLowestHotelPrices` method will do more or less the opposite of the `getLowestAreaPrices` method above. It will provide you with pricing data from one single hotel (as specified by `hotelCode`) but spread out over up to 60 days. This 'price calender' shows both cash rates as well as prices in points. It is important to note though that cash prices **DO NOT** include taxes - see below for more details.
+The `getLowestHotelPrices` method will do more or less the opposite of the `getLowestAreaPrices` method above. It will provide you with pricing data from one single hotel (as specified by `hotelCode`) but spread out over up to 62 days. This 'price calender' shows both cash rates as well as prices in points. It is important to note though that cash prices **DO NOT** include taxes - see below for more details.
 
 ```js
 // Get a calendar of prices for a stay in Mexico City in spring (April and May)

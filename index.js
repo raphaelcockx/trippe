@@ -126,7 +126,7 @@ export default class Trippe {
   }
 
   /**
-   * Returns an array of lowest prices (in points and in cash) for a single hotel - per night and for a period of up to 60 days
+   * Returns an array of lowest prices (in points and in cash) for a single hotel - per night and for a period of up to 62 days
    * Note that the rates that this method returns don't always include (all) taxes
    *
    * @param {string} hotelCode The systemwide id of the hotel
@@ -162,9 +162,9 @@ export default class Trippe {
     // Calculate number of days
     const days = dayjs(endDate).diff(dayjs(startDate), 'day') + 1
 
-    // Check if there's 60 days or less
-    if (days > 60) {
-      throw new Error('Please limit the number of days to 60 or less')
+    // Check if there's 62 days or less
+    if (days > 62) {
+      throw new Error('Please limit the number of days to 62 or less')
     }
 
     const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`

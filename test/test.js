@@ -89,7 +89,7 @@ test('[getLowestHotelPrices] Throws when invalid or unknown hotelCode is provide
   })
 })
 
-test('[getLowestHotelPrices] Throws when more than 60 days are requested', (t) => {
+test('[getLowestHotelPrices] Throws when more than 62 days are requested', (t) => {
   const trippe = new Trippe(process.env.API_KEY)
 
   t.throws(() => {
@@ -98,7 +98,7 @@ test('[getLowestHotelPrices] Throws when more than 60 days are requested', (t) =
       endDate: '2023-12-31'
     })
   }, {
-    message: 'Please limit the number of days to 60 or less'
+    message: 'Please limit the number of days to 62 or less'
   })
 })
 
