@@ -137,7 +137,7 @@ export default class Trippe {
   /**
    * @typedef {Object} startEndDates
    * @property {string} startDate The date (check in date) from which to start searching, defaults to today
-   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 59 days
+   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 61 days
    */
 
   /**
@@ -150,7 +150,7 @@ export default class Trippe {
    */
   getLowestHotelPrices (hotelCode, {
     startDate = dayjs().format('YYYY-MM-DD'),
-    endDate = dayjs(startDate).add(59, 'day').format('YYYY-MM-DD')
+    endDate = dayjs(startDate).add(61, 'day').format('YYYY-MM-DD')
   } = {}) {
     const headers = this.#headers
 
@@ -207,7 +207,7 @@ export default class Trippe {
   /**
    * @typedef {Object} startEndDatesAndGuests
    * @property {string} startDate The date (check in date) from which to start searching, defaults to today
-   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 59 days
+   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 61 days
    * @property {number} adults The number of adult guests in the room
    * @property {number} children The number of children in the room
    */
