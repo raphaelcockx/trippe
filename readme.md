@@ -1,6 +1,6 @@
 # Trippe 🏨
 
-Unofficial API client to check hotel prices and reward night availability at over 6.000 hotels worldwide - suitable for an intercontinental lifestyle. Please get in touch with the hotel company before using this software in production. Please also note that Trippe will **not** work 'out of the box' but needs a (static) API key to perform any request to the backend.
+Unofficial Node client to check hotel prices and reward night availability at over 6.000 hotels worldwide - suitable for an intercontinental lifestyle. Please get in touch with the hotel company before using this software in production. Please also note that Trippe will **not** work 'out of the box' but needs a (static) API key to perform any request to the backend.
 
 [![npm version](https://img.shields.io/npm/v/trippe)](https://www.npmjs.com/package/trippe)
 [![license](https://img.shields.io/github/license/raphaelcockx/trippe)](LICENSE)
