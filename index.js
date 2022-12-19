@@ -175,7 +175,7 @@ export default class Trippe {
       .then(hotel => {
         const { currencyCode, rates } = hotel
 
-        if (rates.length === 0) {
+        if (currencyCode === '') {
           throw new Error('Unknown or invalid hotelCode')
         } else {
           const ratesCombined = rates.flatMap(rate => rate.windows)
