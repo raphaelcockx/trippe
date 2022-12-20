@@ -145,7 +145,7 @@ export default class Trippe {
    * @property {string} hotelCode The systemwide id (mnemonic) of the hotel
    * @property {string} checkinDate The check in date
    * @property {number|null} cashPrice The lowest cash price available - not including (some) taxes for a one night stay, null if no rooms available
-   * @property {string} currecyCode The cuirrency used for the cashPrice above
+   * @property {string} currencyCode The currency used for the cashPrice above
    * @property {number|null} points The lowest number of points available to book a reward night with points only, null if no reward nights are available
    */
   getLowestHotelPrices (hotelCode, {
