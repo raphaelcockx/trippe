@@ -126,12 +126,13 @@ export default class Trippe {
   }
 
   /**
-   * Returns an array of lowest prices (in points and in cash) for a single hotel - per night and for a period of up to 62 days
+   * Returns an object with the hotelCode, the currencyCode and an array  of lowest prices (in points and in cash) for a
+   * single hotel - per night and for a period of up to 62 days
    * Note that the rates that this method returns don't always include (all) taxes
    *
    * @param {string} hotelCode The systemwide id of the hotel
    * @param {startEndDates} dates An object containing startDate and endDate keys (both optional)
-   * @returns {Promise<Array[lowestPriceDay]>}
+   * @returns {Promise<Object[lowestHotelPrices]>}
   */
 
   /**
@@ -141,11 +142,16 @@ export default class Trippe {
    */
 
   /**
-   * @typedef {Object} lowestPriceDay
+   * @typedef { Object } lowestHotelPrices
    * @property {string} hotelCode The systemwide id (mnemonic) of the hotel
+   * @property {string} currencyCode The currency used at this hotel
+   * @property {lowestPriceDay} prices The lowest prices by day
+   */
+
+  /**
+   * @typedef {Object} lowestPriceDay
    * @property {string} checkinDate The check in date
    * @property {number|null} cashPrice The lowest cash price available - not including (some) taxes for a one night stay, null if no rooms available
-   * @property {string} currencyCode The currency used for the cashPrice above
    * @property {number|null} points The lowest number of points available to book a reward night with points only, null if no reward nights are available
    */
   getLowestHotelPrices (hotelCode, {
@@ -168,29 +174,34 @@ export default class Trippe {
     }
 
     const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
-    const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
 
     return got.get(url, { headers }).json()
       .then(json => json.hotels[0])
       .then(hotel => {
         const { currencyCode, rates } = hotel
+        const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
 
         if (currencyCode === '') {
           throw new Error('Unknown or invalid hotelCode')
         } else {
           const ratesCombined = rates.flatMap(rate => rate.windows)
 
-          return dates.map(checkinDate => {
+          const prices = dates.map(checkinDate => {
             const points = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map(rate => rate.totalPoints))
             const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
 
             return {
               checkinDate,
               cashPrice: cashPrice < Infinity ? cashPrice : null,
-              currencyCode,
               points: points < Infinity ? points : null
             }
           })
+
+          return {
+            hotelCode,
+            currencyCode,
+            prices
+          }
         }
       })
   }
