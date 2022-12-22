@@ -106,7 +106,7 @@ test('[getLowestHotelPrices] Gets correctly formatted hotel prices', async (t) =
   const trippe = new Trippe(process.env.API_KEY)
   const hotelPrices = await trippe.getLowestHotelPrices('ANRAW', {})
 
-  t.is(62, hotelPrices.length)
+  t.is(62, hotelPrices.prices.length)
 })
 
 test('[getLowestAreaPrices] Throws when no or invalid coordinates are provided', (t) => {
