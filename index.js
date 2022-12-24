@@ -37,7 +37,9 @@ export default class Trippe {
     }
 
     // Set headers
-    const { version } = readPackageSync()
+    const { version } = readPackageSync({
+      cwd: new URL('./', import.meta.url)
+    })
 
     this.#headers = {
       'x-ihg-api-key': apiKey,
