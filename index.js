@@ -178,6 +178,12 @@ export default class Trippe {
     const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0,IDME2,IGCOR,IDVPD&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
 
     return got.get(url, { headers }).json()
+      .catch((error) => {
+        const { statusCode } = error.response
+        if (statusCode >= 500) {
+          throw new Error(`API reports a server error (statusCode ${statusCode}). Please retry.`)
+        }
+      })
       .then(json => json.hotels[0])
       .then(hotel => {
         const { currencyCode, rates } = hotel
