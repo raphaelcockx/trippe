@@ -43,7 +43,7 @@ export default class Trippe {
 
     this.#headers = {
       'x-ihg-api-key': apiKey,
-      'user-agent': `Trippe v${version} (https://github.com/raphaelcockx/trippe)`
+      'user-agent': `Trippe/${version}`
     }
   }
 
@@ -91,38 +91,36 @@ export default class Trippe {
     }
 
     const headers = this.#headers
-    const url = `https://apis.ihg.com/hotels/v1/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
+    const url = `https://apis.ihg.com/hotels/v3/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
 
     return got.get(url, { headers }).json()
-      .then(json => json.hotelInfo)
-      .then(hotelInfo => {
-        const { brandInfo, location, profile, address } = hotelInfo
-
+      .then(json => json.hotelContent[0])
+      .then(hotelContent => {
+        const { brandInfo, location, profile, address } = hotelContent
         const { brandCode } = brandInfo
-        const { closestCity } = location
-        const { roomsIncludingSuitesCount, latLong, name, shortDescription, longDescription } = profile
 
         return {
           hotelCode,
-          hotelName: name,
+          hotelName: profile.name.find(({ locale }) => locale === 'en_US').value,
           brandCode,
           brandName: brandCodes[brandCode],
           description: {
-            long: longDescription,
-            short: shortDescription
+            long: profile.longDescription.find(({ locale }) => locale === 'en_US').value,
+            short: profile.shortDescription.find(({ locale }) => locale === 'en_US').value
           },
-          numberOfRooms: roomsIncludingSuitesCount,
-          closestCity,
-          street: [address.street1, address.street4].filter((d) => d),
-          postalCode: address.zip,
-          city: address.city,
-          state: 'code' in address.state ? address.state.code : null,
-          country: address.country.code,
-          coordinates: [latLong.longitude, latLong.latitude],
+          numberOfRooms: profile.roomsIncludingSuitesCount,
+          closestCity: location.closestCity[0].value,
+          street: address.translatedMainAddress.line1.find(({ locale }) => locale === 'en_US').value,
+          postalCode: address.translatedMainAddress.zipcode.find(({ locale }) => locale === 'en_US').value,
+          city: address.translatedMainAddress.city.find(({ locale }) => locale === 'en_US').value,
+          state: address.translatedMainAddress.state?.find(({ locale }) => locale === 'en_US').value || null,
+          country: address.translatedMainAddress.country.find(({ locale }) => locale === 'en_US').value,
+          coordinates: [+profile.latLong.longitude, +profile.latLong.latitude],
           url: address.consumerFriendlyURL ? `https://${address.consumerFriendlyURL}` : null
         }
       })
       .catch((err) => {
+        console.log(err.code)
         throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'Unknown or invalid hotelCode' : err)
       })
   }
