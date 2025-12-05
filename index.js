@@ -1,4 +1,5 @@
 import got from 'got'
+import ky from 'ky'
 import dayjs from 'dayjs'
 import { readPackageSync } from 'read-pkg'
 
@@ -126,7 +127,7 @@ export default class Trippe {
   }
 
   /**
-   * Returns an object with the hotelCode, the currencyCode and an array  of lowest prices (in points and in cash) for a
+   * Returns an object with the hotelCode, the currencyCode and an array of lowest prices (in points and in cash) for a
    * single hotel - per night and for a period of up to 62 days
    * Note that the rates that this method returns don't always include (all) taxes
    *
@@ -208,6 +209,117 @@ export default class Trippe {
             currencyCode,
             prices
           }
+        }
+      })
+  }
+
+  /**
+   * Returns an object with the hotelCode, the currencyCode and an array of lowest cash prices for a
+   * single hotel - per night and for a period of up to 62 days
+   * The rates that this method returns should include all taxes
+   *
+   * @param {string} hotelCode The systemwide id of the hotel
+   * @param {startEndDates} dates An object containing startDate and endDate keys (both optional)
+   * @returns {Promise<Object[lowestHotelPrices]>}
+  */
+
+  /**
+   * @typedef {Object} startEndDates
+   * @property {string} startDate The date (check in date) from which to start searching, defaults to today
+   * @property {string} endDate The last date (as a check in date) to include in the search, defaults to today + 61 days
+   */
+
+  /**
+   * @typedef { Object } lowestHotelPrices
+   * @property {string} hotelCode The systemwide id (mnemonic) of the hotel
+   * @property {string} currencyCode The currency used at this hotel
+   * @property {lowestPriceDay} prices The lowest prices by day
+   */
+
+  /**
+   * @typedef {Object} lowestPriceDay
+   * @property {string} checkinDate The check in date
+   * @property {number|null} cashPrice The lowest cash price available - not including (some) taxes for a one night stay, null if no rooms available
+   */
+  getLowestHotelCashPrices (hotelCode, {
+    startDate = dayjs().format('YYYY-MM-DD'),
+    endDate = dayjs(startDate).add(61, 'day').format('YYYY-MM-DD')
+  } = {}) {
+    const headers = this.#headers
+
+    // Check if hotelCode was provided...
+    if (!hotelCode) {
+      throw new Error('hotelCode is required')
+    }
+
+    // ..and is wellformed
+    if (!/^[A-Za-z]{5}$/.test(hotelCode)) {
+      throw new Error('hotelCode is malformed')
+    }
+
+    // Calculate number of days
+    const days = dayjs(endDate).diff(dayjs(startDate), 'day') + 1
+
+    // Check if there's 62 days or less
+    if (days > 62) {
+      throw new Error('Please limit the number of days to 62 or less')
+    }
+
+    const url = 'https://apis.ihg.com/availability/v1/calendar'
+
+    const json = {
+      hotelMnemonics: [hotelCode.toUpperCase()],
+      startDate,
+      endDate,
+      lengthOfStay: 1,
+      rates: {
+        ratePlanCodes: ["6CBARC"]
+      },
+      guestCounts: [
+        {
+          otaCode: "AQC10",
+          count: 1
+        }
+      ],
+      options: {
+        includeSellStrategy: "followChannel",
+        returnAmountsAfterTaxForLowestOffer: true,
+        returnAverages: true,
+        lowestOfferPerRatePlan: true
+      }
+    }
+
+    return ky.post(url, { headers, json }).json()
+      .catch((error) => {
+        const { status } = error.response
+        if (status >= 500) {
+          throw new Error(`API reports a server error (statusCode ${status}). Please retry.`)
+        }
+      })
+      .then((json) => {
+        if ('warnings' in json) {
+          throw new Error(`API reports a data error: ${json.warnings[0].message} (Error ${json.warnings[0].code}). Please retry.`)
+        } else {
+          return json.data.hotels[0]
+        }
+      })
+      .then((hotelData) => {
+        const { hotel, calendar } = hotelData
+        const currencyCode = hotel.propertyCurrency
+
+        const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
+
+        return {
+          hotelCode,
+          currencyCode,
+          prices: dates.map((checkinDate) => {
+            const dayData = calendar.find(({ start }) => start === checkinDate)
+
+            return {
+              checkinDate,
+              cashPrice: dayData ? dayData.offers.find((d) => 'totalAmountAfterFeeTax' in d).totalAmountAfterFeeTax : null
+            }
+          })
         }
       })
   }
