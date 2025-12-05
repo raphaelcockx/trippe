@@ -173,7 +173,7 @@ export default class Trippe {
       throw new Error('Please limit the number of days to 62 or less')
     }
 
-    const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0,IDME2,IGCOR,IDVPD&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
+    const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0,IDME2,IGCOR,IDVPD,IDMAF&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
 
     return got.get(url, { headers }).json()
       .catch((error) => {
