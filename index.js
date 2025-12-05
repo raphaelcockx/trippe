@@ -95,8 +95,8 @@ export default class Trippe {
     const url = `https://apis.ihg.com/hotels/v3/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
 
     return got.get(url, { headers }).json()
-      .then(json => json.hotelContent[0])
-      .then(hotelContent => {
+      .then((json) => json.hotelContent[0])
+      .then((hotelContent) => {
         const { brandInfo, location, profile, address } = hotelContent
         const { brandCode } = brandInfo
 
@@ -183,19 +183,19 @@ export default class Trippe {
           throw new Error(`API reports a server error (statusCode ${statusCode}). Please retry.`)
         }
       })
-      .then(json => json.hotels[0])
-      .then(hotel => {
+      .then((json) => json.hotels[0])
+      .then((hotel) => {
         const { currencyCode, rates } = hotel
         const dates = [...new Array(days)].map((u, i) => dayjs(startDate).add(i, 'day').format('YYYY-MM-DD'))
 
         if (currencyCode === '') {
           throw new Error('Unknown or invalid hotelCode')
         } else {
-          const ratesCombined = rates.flatMap(rate => rate.windows)
+          const ratesCombined = rates.flatMap((rate) => rate.windows)
 
-          const prices = dates.map(checkinDate => {
-            const points = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map(rate => rate.totalPoints))
-            const cashPrice = Math.min(...ratesCombined.filter(rate => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map(rate => rate.totalAmount))
+          const prices = dates.map((checkinDate) => {
+            const points = Math.min(...ratesCombined.filter((rate) => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalPoints' in rate).map((rate) => rate.totalPoints))
+            const cashPrice = Math.min(...ratesCombined.filter((rate) => rate.startDate === `${checkinDate}T00:00:00Z` && 'totalAmount' in rate).map((rate) => rate.totalAmount))
 
             return {
               checkinDate,
@@ -273,16 +273,16 @@ export default class Trippe {
       endDate,
       lengthOfStay: 1,
       rates: {
-        ratePlanCodes: ["6CBARC"]
+        ratePlanCodes: ['6CBARC']
       },
       guestCounts: [
         {
-          otaCode: "AQC10",
+          otaCode: 'AQC10',
           count: 1
         }
       ],
       options: {
-        includeSellStrategy: "followChannel",
+        includeSellStrategy: 'followChannel',
         returnAmountsAfterTaxForLowestOffer: true,
         returnAverages: true,
         lowestOfferPerRatePlan: true
@@ -395,7 +395,7 @@ export default class Trippe {
     }
 
     return got.post(url, { headers, json, retry: { methods: ['POST'] }, throwHttpErrors: false })
-      .then(response => {
+      .then((response) => {
         if (response.statusCode !== 200) {
           const errors = JSON.parse(response.body).errors
 
@@ -412,8 +412,8 @@ export default class Trippe {
           return JSON.parse(response.body)
         }
       })
-      .then(json => json.hotels[0])
-      .then(hotelData => {
+      .then((json) => json.hotels[0])
+      .then((hotelData) => {
         // Get list of products offered
         const { productDefinitions } = hotelData
 
@@ -462,11 +462,11 @@ export default class Trippe {
 
             const cashOptions = 'options' in offer.rewardNights.pointsCash
               ? offer.rewardNights.pointsCash.options.map((option) => {
-                return {
-                  points: option.averageDailyPoints,
-                  cashPrice: option.averageDailyCash
-                }
-              })
+                  return {
+                    points: option.averageDailyPoints,
+                    cashPrice: option.averageDailyCash
+                  }
+                })
               : []
             points = [noCash, ...cashOptions]
           }
@@ -506,9 +506,7 @@ export default class Trippe {
     const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=summary,summary.rateRanges'
 
     // Check coordinates
-    const validCoordinates = Array.isArray(coordinates) &&
-        coordinates.length === 2 &&
-        coordinates.every(d => typeof (d) === 'number')
+    const validCoordinates = Array.isArray(coordinates) && coordinates.length === 2 && coordinates.every((d) => typeof (d) === 'number')
 
     if (!validCoordinates) throw new Error('Invalid format used for coordinates, please use [lng, lat]')
 
@@ -564,9 +562,9 @@ export default class Trippe {
     }
 
     return got.post(url, { headers, json, retry: { methods: ['POST'] } }).json()
-      .then(json => json.hotels)
-      .then(hotels => hotels.filter(hotel => hotel.availabilityStatus === 'OPEN'))
-      .then(hotels => hotels.map(hotel => {
+      .then((json) => json.hotels)
+      .then((hotels) => hotels.filter((hotel) => hotel.availabilityStatus === 'OPEN'))
+      .then((hotels) => hotels.map((hotel) => {
         const { hotelMnemonic: hotelCode, propertyCurrency: currencyCode, lowestPointsOnlyCost, lowestCashOnlyCost } = hotel
 
         const cashPrice = parseFloat(lowestCashOnlyCost.amountAfterTax)
@@ -595,8 +593,8 @@ export default class Trippe {
     const url = `https://apis.ihg.com/locations/v1/destinations?destination=${query}`
 
     return got.get(url, { headers }).json()
-      .then(locations => {
-        return locations.map(location => {
+      .then((locations) => {
+        return locations.map((location) => {
           const { longitude, latitude, clarifiedLocation: display } = location
 
           return {
