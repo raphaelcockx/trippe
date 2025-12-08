@@ -31,7 +31,7 @@ const trippe = new Trippe('API_KEY')
 
 ### `getHotelDetails(hotelCode)`
 
-The `getHotelDetails` method will return some basic info on a specific hotel in the system. It needs a single parameter, in the form of the unique `hotelCode` of the property. This id of 5 characters (all letters, all uppercase) will be used for almost every other method as well.
+The `getHotelDetails` method will return some basic info on a specific hotel in the system. It needs a single parameter, in the form of the unique `hotelCode` of the property. This id of 5 characters (uppercase letters only) will be used for almost every other method as well.
 
 ```js
 // Get details for a specific hotel in Antwerp, Belgium
@@ -44,22 +44,23 @@ Returns a Promise that will resolve with an object containing the following keys
 
 | Key | Type | Description |
 | --- | ---- | ----------- |
-| hotelCode | String | The systemwide id ('mnemonic') of the hotel
-| hotelName | String | The name of the hotel, not taking into account the brand name of the (sub)chain it belongs to
-| brandCode | String | The code of the (sub)chain the hotel belongs to
-| brandName | String | The brand name of the (sub)chain the hotel belongs to
-| description.long & description.short | String | A description of the property, in two formats
-| numberOfRooms | Number | The number of available rooms
-| closestCity | String | The closest city to the hotel (could be the actual city of the address)
-| street | Array | The street part of the property address, with one entry for each line needed (maximum 2)
-| postalCode | String | The postal code of the property
-| city | String | The city the hotel is in
-| state | String | The state part of the address, null when not locally used
-| country | String | The country the hotel is in, expressed as an ISO 3166-1 alpha-2 code
-| coordinates | Array | The coordinates of the hotel, expressed as [longitude, latitude]
-| url | String | The URL of the hotel's homepage
+| hotelCode | String | The systemwide id ('mnemonic') of the hotel |
+| hotelName | String | The name of the hotel, not taking into account the brand name of the (sub)chain it belongs to |
+| brandCode | String | The code of the (sub)chain the hotel belongs to |
+| brandName | String | The brand name of the (sub)chain the hotel belongs to |
+| description.long & description.short | String | A description of the property, in two formats. Long format text will likely contain HTML tags |
+| numberOfRooms | Number | The number of available rooms |
+| closestCity | String | The closest city to the hotel (could be the actual city of the address) |
+| street | String | The street part of the property address |
+| postalCode | String | The postal code of the property |
+| city | String | The city the hotel is in |
+| state | String | The state part of the address, null when not locally used |
+| country | String | The country the hotel is in |
+| coordinates | Array | The coordinates of the hotel, expressed as [longitude, latitude] |
+| url | String | The URL of the hotel's homepage |
 
 ---
+
 ### `getStayPrices(hotelCode, [options])`
 
 The `getStayPrices` method allows you to get a full list of all possible prices at a specific hotel and for a specific set of dates. It returns a list of room types available for booking (Standard Room, Junior Suite...), the different rate plans being offered (Advanced Purchase, Non-Refundable, Member Rates...) and the price of any combination of rooms and rates - both in points as well in cash including taxes.
@@ -67,8 +68,8 @@ The `getStayPrices` method allows you to get a full list of all possible prices 
 ```js
 // Get all available rates for a two-night stay in Tokyo
 const stayPrices = await trippe.getStayPrices('TYOHB', {
-  checkinDate: '2023-03-01',
-  checkoutDate: '2023-03-03',
+  checkinDate: '2026-03-01',
+  checkoutDate: '2026-03-03',
   adults: 2
 })
 ```
@@ -91,9 +92,9 @@ Returns a Promise that will resolve with an object containing the following keys
 | Key | Type | Description |
 | --- | ---- | ----------- |
 | products | Array | Available products (room types), see below |
-| ratePlans | Array | Available rate plans, see below
+| ratePlans | Array | Available rate plans, see below |
 | currencyCode | String | The ISO 4217 currency code in which prices are expressed |
-| prices | Array | Available combinations of products and rate plans, see below
+| prices | Array | Available combinations of products and rate plans, see below |
 
 The **`products`** array contains objects with these keys:
 
@@ -120,15 +121,16 @@ Finally, the combinations of products and rate plans being offered are listed in
 | --- | ---- | ----------- |
 | productCode | String | The product id, as used in `products` above |
 | rateCode | String | The rate plan id, as used in `ratePlans` above |
-| cashPrice | Number | The room price in the hotel's currency. Will be null for reward rates |
+| cashPrice | Number or null | The room price in the hotel's currency. Will be null for reward rates |
 | points | Array or null | The room price in points, including points and cash offers - formatted as an array of objects with `points` and `cashPrice` keys. Will be null if the `rateCode` refers to a cash rate |
 
 Please note that any `cashPrice` included as part of a cash and points offers will **always** be in US Dollars!
 
 ---
+
 ### `getDestinations(query)`
 
-The `getDestinations` method can autocomplete any geographic text query and show the corresponding set of  coordinates. Useful queries include (partial) city or airport names, landmarks and even full addresses in major cities.
+The `getDestinations` method can autocomplete any geographic text query and show the corresponding set of coordinates. Useful queries include (partial) city or airport names, landmarks and even full addresses in major cities.
 
 ```js
 const destinations = await trippe.getDestinations('Van')
@@ -147,6 +149,7 @@ Returns a Promise that will resolve with an array of objects each containing the
 Although queries are language-specific, `getDestinations` can for the moment only work with query strings in English. More language support is coming soon.
 
 ---
+
 ### `getLowestAreaPrices(coordinates, [options])`
 
 The `getLowestAreaPrices` method allows you to compare hotel prices in a radius of up to 100 miles / 160 kilometres around a geographic centre point. It will provide you with the lowest price (in both cash and points) available at each hotel within that radius for a given night and including taxes. Prices always represent a stay of 1 night in 1 room, but you can specify the number of guests.
@@ -154,15 +157,15 @@ The `getLowestAreaPrices` method allows you to compare hotel prices in a radius 
 ```js
 // Get the lowest prices for a one-night stay in a radius of 20 km
 // around the Place de la Concorde in Paris
-const lowestAreaPrices = await trippe.getHotelDetails([2.321096215980252, 48.86542132948351], {
+const lowestAreaPrices = await trippe.getLowestAreaPrices([2.321096215980252, 48.86542132948351], {
   radius: 20,
   unit: 'km',
-  checkinDate: '2023-04-01'
+  checkinDate: '2026-04-01',
   adults: 2
 })
 ```
 
-Coordinates should be expressed as [longitude, latitude] (can be exported from `getDestinations`). As with all methods that involve specifying a date, Trippe expects the `checkinDate` to be a string formatted as `YYYY-MM-DD` (AKA [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html))
+Coordinates should be passed as [longitude, latitude] (can be exported from `getDestinations`). As with all methods that involve specifying a date, Trippe expects the `checkinDate` to be a string formatted as `YYYY-MM-DD` (AKA [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html))
 
 #### Options
 
@@ -171,7 +174,7 @@ The options object is optional, as are any of its keys. Keys and default values 
 | Key | Type | Default | Description |
 | --- | ---- | ------- | ----------- |
 | radius | Number | 100 | The search radius around `coordinates` up to a maximum value of 100 |
-| unit = | String | mi | Either 'mi' for miles or 'km' for kilometres |
+| unit | String | mi | Either 'mi' for miles or 'km' for kilometres |
 | checkinDate | String | Today's date in your local timezone | The check-in date in ISO 8601 date format |
 | adults | Number | 1 | The number of adults sharing the room |
 | children | Number | 0 | The number of children sharing the room |
@@ -184,21 +187,22 @@ Returns a Promise that will resolve with an array of objects each containing the
 | --- | ---- | ----------- |
 | hotelCode | String | The systemwide id ('mnemonic') of the hotel |
 | cashPrice | Number | The lowest available price at the hotel for that night, in the hotel's currency |
-| currencyCode | String | The ISO 4217 currency code in which the `cashPrice` is expressed |
-| points | Number | The lowest available price at the hotel for that night, in points |
+| currencyCode | String | The ISO 4217 currency code in which the `cashPrice` is provided |
+| points | Number | The lowest available price at the hotel for that night, in points (with no cash component) |
 
 **Please note** that this method will not include hotels that have no rooms available. You should therefore not use this method to get a list of hotels in a certain area.
 
 ---
+
 ### `getLowestHotelPrices(hotelCode, [options])`
 
-The `getLowestHotelPrices` method will do more or less the opposite of the `getLowestAreaPrices` method above. It will provide you with pricing data from one single hotel (as specified by `hotelCode`) but spread out over up to 62 days. This 'price calender' shows both cash rates as well as prices in points. It is important to note though that cash prices **DO NOT** include taxes - see below for more details.
+The `getLowestHotelPrices` method will do more or less the opposite of the `getLowestAreaPrices` method above. It will provide you with pricing data from one single hotel (as specified by `hotelCode`) but spread out over up to 62 days. This 'price calender' shows both cash rates as well as prices in points. It is important to note though that with this method cash prices **DO NOT** always include taxes - see below for more details.
 
 ```js
 // Get a calendar of prices for a stay in Mexico City in spring (April and May)
-const lowestPrices = trippe.getLowestHotelPrices('MEXHA', {
-  startDate: '2023-04-01',
-  endDate: '2023-05-30'
+const lowestHotelPrices = await trippe.getLowestHotelPrices('MEXHA', {
+  startDate: '2026-04-01',
+  endDate: '2026-05-30'
 })
 ```
 
@@ -219,12 +223,46 @@ Returns a Promise that will resolve with an array of objects each containing the
 | --- | ---- | ----------- |
 | checkinDate | String | The check-in date to which these prices are applicable (in ISO 8601 date format) |
 | currencyCode | String | The ISO 4217 currency code in which prices are expressed |
-| cashPrice | Number | The lowest room price in the hotel's currency. Will be null if no rooms are available. |
+| cashPrice | Number or null | The lowest room price in the hotel's currency. Will be null if no rooms are available. |
 | points | Array or null | The lowest room price in points. Will be null if no reward stays are available. |
 
-All prices reflect a one-night stay by 1 adult in 1 room.
+All prices reflect a one-night stay by 1 adult in 1 room. Depending on local legislation, these prices may include all mandatory taxes (such as VAT) but not for instance a local tourism tax. In other countries, notably the US, there may be a number of additional taxes that aren't disclosed in the API and not included in the cashPrice above. See below for an alternative method.
 
 ---
+
+### `getLowestHotelCashPrices(hotelCode, [options])`
+
+This method follows the same logic as the `getLowestHotelPrices` method above and will check prices for a single hotel in a (up to) 62-night window. It **WILL** return the final prices to be paid, including all taxes and fees. However, it **DOESN'T** get any points rates.
+
+```js
+// Get a calendar of prices for a stay in Mexico City in spring (April and May)
+const lowestHotelCashPrices = await trippe.getLowestHotelPrices('MEXHA', {
+  startDate: '2026-04-01',
+  endDate: '2026-05-30'
+})
+```
+
+#### Options
+
+The options object is optional, as are any of its keys. Keys and default values are as follows:
+
+| Key | Type | Default | Description |
+| --- | ---- | ------- | ----------- |
+| startDate | String | Today's date in your local timezone | The first check-in date (in ISO 8601 date format) for which prices are to be determined |
+| endDate | String | Today's date in your local timezone + 59 days | The last check-in date (in ISO 8601 date format) for which prices are to be determined |
+
+#### Returns
+
+Returns a Promise that will resolve with an array of objects each containing the following keys:
+
+| Key | Type | Description |
+| --- | ---- | ----------- |
+| checkinDate | String | The check-in date to which these prices are applicable (in ISO 8601 date format) |
+| currencyCode | String | The ISO 4217 currency code in which prices are expressed |
+| cashPrice | Number or null | The lowest room price in the hotel's currency. Will be null if no rooms are available. |
+
+---
+
 ### `getBookingPageUrl(hotelCode, [options])`
 
 The `getBookingPageUrl` method will allow you to link to the booking page on the official site. When using the URL returned by this method, all details about the stay will be prefilled and users will be able to select a room type and rate.
@@ -232,8 +270,8 @@ The `getBookingPageUrl` method will allow you to link to the booking page on the
 ```js
 // Book a two-night stay in early March in Tokyo
 const bookingUrl = await trippe.getBookingPageUrl('TYOHB', {
-  checkinDate: '2023-03-01',
-  checkoutDate: '2023-03-03',
+  checkinDate: '2026-03-01',
+  checkoutDate: '2026-03-03',
   adults: 2
 })
 ```
@@ -258,9 +296,9 @@ The difference isn't however as clear-cut as you'd expect. Depending on local la
 
 In other places the difference between both numbers may be significant as sales taxes, local hotel taxes and so-called amenity fees CAN be left out and really add up. While Trippe could get itemised tax rates for each hotel from the hotel, it turns out that these numbers aren't always correct - certainly not often enough to feed them to an automated system.
 
-### Throttling 
+### Throttling
 
-Every method listed above corresponds to - at the most - **one underlying API call**. This means, for instance, that using the `getLowestAreaPrices` will not return hotel names, as this info is not returned from the API. It is up to your code to use `getHotelDetails` to translate a `hotelCode` to the name, address or location of the hotel in question and to store that information where needed. It also means that Trippe doesn't do any *throttling** towards the API. Your code should make sure that calls to Trippe methods are 'spaced out' in such a way that you don't get blocked by the API. For a quick and easy rate-limiting setup, [Bottleneck](https://www.npmjs.com/package/bottleneck) works well.
+Every method listed above corresponds to - at the most - **one underlying API call**. This means, for instance, that using the `getLowestAreaPrices` will not return hotel names, as this info is not returned from the API. It is up to your code to use `getHotelDetails` to translate a `hotelCode` to the name, address or location of the hotel in question and to store that information where needed. It also means that Trippe doesn't do any *throttling* towards the API. Your code should make sure that calls to Trippe methods are 'spaced out' in such a way that you don't get blocked by the API. For a quick and easy rate-limiting setup, [Bottleneck](https://www.npmjs.com/package/bottleneck) works well.
 
 ## Contributing
 
