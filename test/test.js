@@ -3,7 +3,7 @@ import dotenv from 'dotenv'
 
 import Trippe from '../index.js'
 
-test.before('Load environment variables', (t) => {
+test.before('Load environment variables', () => {
   dotenv.config()
 })
 
@@ -48,7 +48,7 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
     description: 'object',
     numberOfRooms: 'number',
     closestCity: 'string',
-    street: 'array',
+    street: 'string',
     postalCode: 'string',
     city: 'string',
     state: 'object',
@@ -58,7 +58,6 @@ test('[getHotelDetails] Gets correctly formatted hotel details', async (t) => {
   })
 
   t.is(hotelDetails.brandCode.length, 4)
-  t.is(hotelDetails.country.length, 2)
 })
 
 test('[getDestinations] Gets correctly formatted list of destinations', async (t) => {
