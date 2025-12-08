@@ -627,6 +627,6 @@ export default class Trippe {
     const checkoutDay = checkoutDateElements[2]
     const checkoutMonthYear = `${(+checkoutDateElements[1] - 1).toString().padStart(2, '0')}${checkoutDateElements[0]}`
 
-    return `https://www.ihg.com/hotels/us/en/find-hotels/select-roomrate?fromRedirect=true&qSrt=sBR&qSlH=${hotelCode}&qRms=1&qAdlt=${adults}&qChld=${children}&qCiD=${checkinDay}&qCiMy=${checkinMonthYear}&qCoD=${checkoutDay}&qCoMy=${checkoutMonthYear}`
+    return `https://www.ihg.com/hotels/gb/en/find-hotels/select-roomrate?qDest=%20&qSlH=${hotelCode}&qRms=1&qAdlt=${adults}&qChld=${children}&qCiD=${checkinDay}&qCiMy=${checkinMonthYear}&qCoD=${checkoutDay}&qCoMy=${checkoutMonthYear}`
   }
 }
