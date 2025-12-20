@@ -29,7 +29,7 @@ const brandCodes = {
 }
 
 export default class Trippe {
-  #headers
+  #api
 
   constructor (apiKey) {
     // Check if apiKey was provided
@@ -37,15 +37,17 @@ export default class Trippe {
       throw new Error('apiKey is required')
     }
 
-    // Set headers
+    // Construct headers object
     const { version } = readPackageSync({
       cwd: new URL('./', import.meta.url)
     })
 
-    this.#headers = {
+    const headers = {
       'x-ihg-api-key': apiKey,
       'user-agent': `Trippe/${version}`
     }
+
+    this.#api = ky.extend({ headers })
   }
 
   /**
@@ -91,10 +93,10 @@ export default class Trippe {
       throw new Error('hotelCode is required')
     }
 
-    const headers = this.#headers
+    const api = this.#api
     const url = `https://apis.ihg.com/hotels/v3/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
 
-    return ky(url, { headers }).json()
+    return api(url).json()
       .then((json) => json.hotelContent[0])
       .then((hotelContent) => {
         const { brandInfo, location, profile, address } = hotelContent
@@ -159,7 +161,7 @@ export default class Trippe {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(61, 'day').format('YYYY-MM-DD')
   } = {}) {
-    const headers = this.#headers
+    const api = this.#api
 
     // Check if hotelCode was provided
     if (!hotelCode) {
@@ -176,7 +178,7 @@ export default class Trippe {
 
     const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0,IDME2,IGCOR,IDVPD,IDMAF&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
 
-    return ky(url, { headers }).json()
+    return api(url).json()
       .catch((error) => {
         if (isHTTPError(error)) {
           const { status } = error.response
@@ -247,7 +249,7 @@ export default class Trippe {
     startDate = dayjs().format('YYYY-MM-DD'),
     endDate = dayjs(startDate).add(61, 'day').format('YYYY-MM-DD')
   } = {}) {
-    const headers = this.#headers
+    const api = this.#api
 
     // Check if hotelCode was provided...
     if (!hotelCode) {
@@ -291,7 +293,7 @@ export default class Trippe {
       }
     }
 
-    return ky.post(url, { headers, json }).json()
+    return api.post(url, { json }).json()
       .then((json) => {
         if ('warnings' in json) {
           throw new Error(`API reports a data error: ${json.warnings[0].message} (Error ${json.warnings[0].code}). Please retry.`)
@@ -349,7 +351,7 @@ export default class Trippe {
     adults = 1,
     children = 0
   } = {}) {
-    const headers = this.#headers
+    const api = this.#api
 
     // Check if hotelCode was provided
     if (!hotelCode) {
@@ -396,7 +398,7 @@ export default class Trippe {
       }
     }
 
-    return ky.post(url, { headers, json, throwHttpErrors: false })
+    return api.post(url, { json, throwHttpErrors: false })
       .then(async (response) => {
         if (response.status !== 200) {
           const json = await response.json()
@@ -505,7 +507,7 @@ export default class Trippe {
     adults = 1,
     children = 0
   } = {}) {
-    const headers = this.#headers
+    const api = this.#api
     const url = 'https://apis.ihg.com/availability/v3/hotels/offers?fieldset=summary,summary.rateRanges'
 
     // Check coordinates
@@ -564,7 +566,7 @@ export default class Trippe {
       }
     }
 
-    return ky.post(url, { headers, json }).json()
+    return api.post(url, { json }).json()
       .then((json) => json.hotels)
       .then((hotels) => hotels.filter((hotel) => hotel.availabilityStatus === 'OPEN'))
       .then((hotels) => hotels.map((hotel) => {
@@ -592,10 +594,10 @@ export default class Trippe {
     // Check that the query is 3 characters or longer
     if (query.length < 3) throw new Error('Query string should be 3 characters or more')
 
-    const headers = this.#headers
+    const api = this.#api
     const url = `https://apis.ihg.com/locations/v1/destinations?destination=${query}`
 
-    return ky.get(url, { headers }).json()
+    return api.get(url).json()
       .then((locations) => {
         return locations.map((location) => {
           const { longitude, latitude, clarifiedLocation: display } = location
