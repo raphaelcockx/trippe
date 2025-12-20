@@ -1,5 +1,5 @@
-import got from 'got'
 import ky from 'ky'
+import { isHTTPError } from 'ky'
 import dayjs from 'dayjs'
 import { readPackageSync } from 'read-pkg'
 
@@ -94,7 +94,7 @@ export default class Trippe {
     const headers = this.#headers
     const url = `https://apis.ihg.com/hotels/v3/profiles/${hotelCode}/details?fieldset=brandInfo,location,profile,address`
 
-    return got.get(url, { headers }).json()
+    return ky(url, { headers }).json()
       .then((json) => json.hotelContent[0])
       .then((hotelContent) => {
         const { brandInfo, location, profile, address } = hotelContent
@@ -120,9 +120,9 @@ export default class Trippe {
           url: address.consumerFriendlyURL ? `https://${address.consumerFriendlyURL}` : null
         }
       })
-      .catch((err) => {
-        console.log(err.code)
-        throw new Error(err.code === 'ERR_NON_2XX_3XX_RESPONSE' ? 'Unknown or invalid hotelCode' : err)
+      .catch((error) => {
+        const { status } = error.response
+        throw new Error(status === 500 ? 'Unknown or invalid hotelCode' : error.response.message)
       })
   }
 
@@ -176,11 +176,13 @@ export default class Trippe {
 
     const url = `https://apis.ihg.com/availability/v1/windows?hotelCodes=${hotelCode.toUpperCase()}&rateCodes=IVANI,IDMAP,IDME0,IDME2,IGCOR,IDVPD,IDMAF&startDate=${startDate}T00:00:00Z&endDate=${endDate}T00:00:00Z&lengthOfStay=1&numberOfRooms=1&includeSellStrategy=never`
 
-    return got.get(url, { headers }).json()
+    return ky(url, { headers }).json()
       .catch((error) => {
-        const { statusCode } = error.response
-        if (statusCode >= 500) {
-          throw new Error(`API reports a server error (statusCode ${statusCode}). Please retry.`)
+        if (isHTTPError(error)) {
+          const { status } = error.response
+          if (status >= 500) {
+            throw new Error(`API reports a server error (statusCode ${status}). Please retry.`)
+          }
         }
       })
       .then((json) => json.hotels[0])
@@ -290,12 +292,6 @@ export default class Trippe {
     }
 
     return ky.post(url, { headers, json }).json()
-      .catch((error) => {
-        const { status } = error.response
-        if (status >= 500) {
-          throw new Error(`API reports a server error (statusCode ${status}). Please retry.`)
-        }
-      })
       .then((json) => {
         if ('warnings' in json) {
           throw new Error(`API reports a data error: ${json.warnings[0].message} (Error ${json.warnings[0].code}). Please retry.`)
@@ -320,6 +316,12 @@ export default class Trippe {
               cashPrice: dayData ? dayData.offers.find((d) => 'totalAmountAfterFeeTax' in d).totalAmountAfterFeeTax : null
             }
           })
+        }
+      })
+      .catch((error) => {
+        const { status } = error.response
+        if (status >= 500) {
+          throw new Error(`API reports a server error (statusCode ${status}). Please retry.`)
         }
       })
   }
@@ -394,10 +396,11 @@ export default class Trippe {
       }
     }
 
-    return got.post(url, { headers, json, retry: { methods: ['POST'] }, throwHttpErrors: false })
-      .then((response) => {
-        if (response.statusCode !== 200) {
-          const errors = JSON.parse(response.body).errors
+    return ky.post(url, { headers, json, throwHttpErrors: false })
+      .then(async (response) => {
+        if (response.status !== 200) {
+          const json = await response.json()
+          const { errors } = json
 
           if (errors.map((error) => error.code).includes('INVALID_HOTEL_MNEMONICS')) {
             throw new Error('Unknown or invalid hotelCode')
@@ -561,7 +564,7 @@ export default class Trippe {
       }
     }
 
-    return got.post(url, { headers, json, retry: { methods: ['POST'] } }).json()
+    return ky.post(url, { headers, json }).json()
       .then((json) => json.hotels)
       .then((hotels) => hotels.filter((hotel) => hotel.availabilityStatus === 'OPEN'))
       .then((hotels) => hotels.map((hotel) => {
@@ -592,7 +595,7 @@ export default class Trippe {
     const headers = this.#headers
     const url = `https://apis.ihg.com/locations/v1/destinations?destination=${query}`
 
-    return got.get(url, { headers }).json()
+    return ky.get(url, { headers }).json()
       .then((locations) => {
         return locations.map((location) => {
           const { longitude, latitude, clarifiedLocation: display } = location
