@@ -9,8 +9,7 @@ test.before('Load environment variables', () => {
 
 test('[constructor] Throws when no API key provided', (t) => {
   t.throws(() => {
-    // eslint-disable-next-line no-unused-vars
-    const trippe = new Trippe()
+    new Trippe()
   }, {
     message: 'apiKey is required'
   })
@@ -65,7 +64,7 @@ test('[getDestinations] Gets correctly formatted list of destinations', async (t
   const destinations = await trippe.getDestinations('Ant')
 
   t.true(Array.isArray(destinations))
-  t.true(destinations.map(destination => destination.display).includes('Antwerp, Belgium'))
+  t.true(destinations.map((destination) => destination.display).includes('Antwerp, Belgium'))
 })
 
 test('[getLowestHotelPrices] Throws when no hotelCode is provided', (t) => {
